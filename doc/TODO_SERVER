@@ -1,0 +1,23 @@
+####################  BACKLOG DO SERVER ######################
+
+linguagem: python
+requisitos:
+
+-- suporte a múltiplas partidas simultâneas
+-- desempenho razoavel para todas as partidas
+?? -- possibilidade de criação de regras diferentes (API?)
+-- independente de cliente (protocolo agnóstico, talvez XML?)
+-- suporte à lobby, rankings, bagdges e afins (+persistencia, +bd)
+-- suporte à usuário+senha
+-- suporte à protocolos diferentes (+idéia: embutir o protocolo dentro do http para pessoas que tem problemas com port forwarding)
+
+Acho que a parte de server é a mais simples, pois basta desenvolver o protocolo e a parte de network que em python é muito simples e garante boa performance com o asyncore. Caso a gente queira a criação de regras diferentes complica um pouco mais, porque aí temos que fazer uma API e implementar a flexibilidade, etc etc etc o que pode demorar um pouco o desenvolvimento para que fique bonitista, então precisamos decidir isso desde o começo. IMHO acho que seria legal implementar regras do risk, por exemplo, que eu considero mais divertido que o próprio war.
+
+####################  REFERENCIAS ######################
+
+Asyncore (lib de network assíncrono do python)
+http://docs.python.org/library/asyncore.html
+
+Twisted matrix (lib mais fuderosa de network que conheço, não sei se temos necessidade de tanto poder assim, mas pode quebrar um galho nas abstrações pra gente)
+http://twistedmatrix.com/trac/
+http://onlamp.com/pub/a/python/2006/08/10/untwisting-python-network-programming.html

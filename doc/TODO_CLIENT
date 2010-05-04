@@ -1,0 +1,21 @@
+####################  BACKLOG DO CLIENT ######################
+
+linguagem: python
+GUI: PyQt
+
+requisitos:
+
+-- performático em computadores ruins?
+-- Capacidade de lidar com diversas regras?
+-- Temas?(+ Qt suporta temas bonitos? )
+
+Mesmo problema aqui. Se formos orientados a um único tipo de regra, sussa. Caso não, temos que fazer algo mais package-orientado, algo como se o server tivesse que prover o GFX do jogo para o cliente. No mais é só fazer a telinha e conversar no protocolo do server :) No caso, a acessoria de um designer de intefaces seria legal, porque eu sou péssimo fazendo telinhas uahehieauae
+
+####################  REFERENCIAS ######################
+
+PyQT
+http://www.commandprompt.com/community/pyqt/
+
+deem uma olhada em como carregar stuff dos .ui (gerados pelo qt-designer)
+http://www.rkblog.rk.edu.pl/w/p/introduction-pyqt4/
+
