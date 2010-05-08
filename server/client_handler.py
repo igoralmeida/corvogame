@@ -2,6 +2,11 @@
 import asyncore, socket
 
 class ClientHandler(asyncore.dispatcher):
+  ''' Basic low level handler. Implents write capabilities, as some other useful methods 
+  
+  TODO: thread/tasklets for buffer incoming handling as passing all data on the same socket thread
+	can be hazardous
+  '''
   def __init__(self, conn):
     asyncore.dispatcher.__init__(self, conn)
     self.obuffer = []

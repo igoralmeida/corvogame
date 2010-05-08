@@ -2,6 +2,7 @@
 import json
 
 def read(raw_message):
+  ''' Basic reader. Searches for endlines, strip unused character's and tries to parse them as json objects '''
   assert type(raw_message) == str
   output = []
   errors = []
