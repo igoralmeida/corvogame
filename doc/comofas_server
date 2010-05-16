@@ -1,0 +1,14 @@
+Criei um ServerListener derivado do asyncore.dispatcher responsável por aceitar
+as conexões. Eu fiz com a idéia de "fábrica abstratas" (podendo registrar
+handlers de leitura/autenticação) para que depois isso seja transparente, mas no
+momento fiz meio que hardcoded mesmo. Estou utilizando o json por ser
+extremamente simples de se ler e com um procolo endline/based, para que possamos
+testar via telnet. Depois se quisermos mudar o protocolo, com a fábrica fica
+simples :)
+
+no caso, fiz só a parte de resolução de um cliente desconhecido
+(UnknownConnectionHandler), que trata uma conexão "raw" e realiza qual protocolo
+e posteriormente espera a mensagem de autenticação do usuário. Caso tudo certo,
+ele autentica e deverá (ainda não fiz essa parte) promover o cliente para uma
+seção e adicionar num lobby/ jogo, etc.
+

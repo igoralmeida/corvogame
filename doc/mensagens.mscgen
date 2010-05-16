@@ -1,0 +1,25 @@
+#Informacoes: http://www.mcternan.me.uk/mscgen/index.html
+msc {
+	Client,Server,UnknownConnectionHandler,MessageHandler,AuthHandler;
+
+	Server<=Server [ label = "bind + listen" ] ;
+	Server<<MessageHandler [ label = "protocolo" ];
+	Server<<AuthHandler [ label = "autenticador" ];
+	--- [ label = "loop infinito esperando conexoes" ];
+	...;
+
+	--- [ label = "inicio de uma conexao [1]" ];
+	Client->Server [ label = "handle_accept()" ] ;
+	Server=>UnknownConnectionHandler [ label = "__init__()" ] ;
+	Client<-UnknownConnectionHandler [ label = "Welcome..., protocol?" ] ;
+
+	--- [ label = "selecao do protocolo [2]" ];
+	Client->UnknownConnectionHandler [ label = "json" ] ;
+
+	--- [ label = "autenticacao [3] " ];
+	Client->UnknownConnectionHandler [ label = "action,user,passwd", ID="*" ];
+	...;
+	|||;
+	--- [ label = "*formato json: {'action':'logon','username':'user','password':'password'}" ];
+
+}
