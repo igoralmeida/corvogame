@@ -17,12 +17,12 @@ import asyncore
 import socket
 
 class ClientHandler(asyncore.dispatcher):
-    """ Basic low level handler. Implents write capabilities, as well as some
-    other useful methods
+    """ Basic low-level handler. Implement write capabilities, as well as some
+    other useful methods.
     """
 
-    # TODO: thread/tasklets for buffer incoming handling as passing all data on
-    # the same socket thread can be hazardous
+    # TODO: use threads/tasklets to buffer incoming messages' handling. Passing
+    # all data on the same socket thread can be hazardous
 
     def __init__(self, conn):
         asyncore.dispatcher.__init__(self, conn)

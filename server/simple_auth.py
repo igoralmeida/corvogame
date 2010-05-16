@@ -14,7 +14,7 @@
 #    along with corvogame.  If not, see <http://www.gnu.org/licenses/>.
 
 def authenticate(msg):
-    """ a VERY dummy authentication method """
+    """ A VERY dummy authentication method """
 
     return msg[u'username'] == 'user' and msg[u'password'] == '123456'
 

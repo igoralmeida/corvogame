@@ -16,8 +16,8 @@
 import json
 
 def read(raw_message):
-    """ Basic reader. Searches for endlines, strip unused character's and tries
-    to parse them as json objects
+    """ Basic reader. Search for endlines, strip unused characters and try
+    to parse as json object
     """
 
     assert type(raw_message) == str

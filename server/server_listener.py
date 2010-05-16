@@ -24,12 +24,12 @@ import client_handler
 class UnknownConnectionHandler(client_handler.ClientHandler):
     """ Class handler for an unknown source connection
 
-    We define as unknown connection a client that has not made a initial
+    We define as unknown connection a client that has not made an initial
     handshake: before we determine the message protocol and authentication steps
     """
 
     def __init__(self, conn, server):
-        """ Starts the handler and define the read method as 'not protocol
+        """ Start the handler and define the read method as 'no protocol
         enabled yet'
         """
 
@@ -39,8 +39,8 @@ class UnknownConnectionHandler(client_handler.ClientHandler):
         self.read_handler = self._unknown_protocol_message
 
     def _unknown_protocol_message(self, data):
-        """ handshake handler. basically it checks if the client has inputted an
-        valid protocol_handler. Otherwise, disconnects
+        """ Handshake handler. Basically check if the client has input a valid
+        protocol_handler. Otherwise, disconnect.
         """
 
         prot_type = data.strip()
@@ -56,9 +56,9 @@ class UnknownConnectionHandler(client_handler.ClientHandler):
             self.shutdown()
 
     def _auth_handler(self, data):
-        """ after promoted as an protocol enabled connection, waits for an logon message,
-        and give it to the auth_handler to check if something gone wrong. If yes,
-        disconnects, otherwise notify the server to a new session
+        """ After promoted to a protocol-enabled connection, wait for a logon
+        message, and give it to the auth_handler to check if something went
+        wrong. If yes, disconnect, otherwise notify the server to a new session
         """
 
         (readed, errors) = self.message_handler(data)
@@ -70,6 +70,7 @@ class UnknownConnectionHandler(client_handler.ClientHandler):
                 username = message[u'username']
                 password = message[u'password']
 
+                # TODO: use the authenticator
                 print 'User {0} has logged with password {1}'.format(username,
                         password)
             except KeyError:
@@ -77,13 +78,13 @@ class UnknownConnectionHandler(client_handler.ClientHandler):
                 self.shutdown()
 
     def handle_read(self):
-        """ reads some data and call the current handler """
+        """ Read some data and call the current handler """
 
         data = self.recv(8192)
         self.read_handler(data)
 
 class ServerListener(asyncore.dispatcher):
-    """ Basic TCP server. Handles new connections and send them to an
+    """ Basic TCP server. Handle new connections and send them to an
     UnknownConnectionHandler, later promoting it to active sessions
     """
 
@@ -102,22 +103,22 @@ class ServerListener(asyncore.dispatcher):
         self.listen(5)
 
     def register_message_handler(self, protocol, handler):
-        """ register's message handlers. Used to make the server abstract on how
-        messages are parsed.
+        """ Register message handlers. Used to make message parsing transparent
+        to the server.
         """
 
         self.message_handlers[protocol] = handler
 
     def register_auth_handler(self, handler):
-        """ register's authentication handlers. Used to make the server abstract
-        on how messages are parsed.
+        """ Register authentication handlers. Used to make message parsing
+        transparent to the server.
         """
 
         self.auth_handler = handler
 
     def handle_accept(self):
-        """ Handle an incomming connection and build a unknonw connection
-        handler over it
+        """ Handle an incoming connection and wrap an Unknown Connection
+        Handler around it.
         """
 
         try:
