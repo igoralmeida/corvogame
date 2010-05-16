@@ -9,9 +9,13 @@ class ClientHandler(asyncore.dispatcher):
   '''
   def __init__(self, conn):
     asyncore.dispatcher.__init__(self, conn)
+    self.message_handler = None
+    self.read_handler = None
     self.obuffer = []
-
+    self.inbuffer = ""
+    
   def write(self, data):
+    print "writing some stuff"
     self.obuffer.append(data)
 
   def shutdown(self):
@@ -19,7 +23,24 @@ class ClientHandler(asyncore.dispatcher):
        
   def writable(self):
     return self.obuffer
-    
+  
+  def handle_read(self):
+    ''' reads some data and call the current handler '''
+    if self.message_handler and self.read_handler:
+      data = self.recv(8192)      
+      try:
+	(status, messages, rest) = self.message_handler.from_string(data)
+	assert type(messages) == list
+      
+	if status == True:	  
+	  for message in messages:
+	    self.read_handler(message)	
+	  self.inbuffer = rest
+	else:
+	  self.inbuffer = self.inbuffer + data
+      except:
+	self.shutdown()
+
   def handle_write(self):
     if self.obuffer[0] is None:
       self.close()
