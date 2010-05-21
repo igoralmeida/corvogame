@@ -18,4 +18,3 @@ class AuthFactory(object):
 
     def handle_logon(self, message):
         pass
-

@@ -17,4 +17,3 @@ def authenticate(msg):
     """ A VERY dummy authentication method """
 
     return msg[u'username'] == 'user' and msg[u'password'] == '123456'
-
