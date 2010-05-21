@@ -1,5 +1,21 @@
 # -*- coding: utf-8 -*-
-import asyncore, socket
+#    This file is part of corvogame.
+#
+#    corvogame is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    corvogame is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with corvogame.  If not, see <http://www.gnu.org/licenses/>.
+
+import asyncore
+import socket
 
 class ClientHandler(asyncore.dispatcher):
   ''' Basic low level handler. Implents write capabilities, as some other useful methods 
@@ -51,8 +67,3 @@ class ClientHandler(asyncore.dispatcher):
       self.obuffer.pop(0)
     else:
       self.obuffer[0] = self.obuffer[0][sent:]   
-        
-    
-      
-    
-    
