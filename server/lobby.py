@@ -12,7 +12,30 @@ class Lobby(threading.Thread):
         self.sessions = {}
         self.channels = {}
         self.message_queue = Queue.Queue()
+
+        self.handlers =  { 'chat' : self.handle_chat , 'quit' : self.handle_session_quit }
+
         self.start()
+
+    def handle_session_quit(session, message):
+        logging.debug("Handling session quit")
+
+        del self.sessions[session.username]
+
+        msg = {}
+        msg["action"] = "session_logout"
+        msg["user"] = session.username
+
+        self.broadcast({u'session' : 'lobby'} , msg)
+
+        session.shutdown()
+
+    def handle_chat(self, session, message):
+        logging.debug("Handling chat message")
+        message["action"] = u'lobby_chat'
+        message["sender"] = session.username
+
+        self.broadcast(session, message)
 
     def get_rooms(self):
         logging.debug("Getting rooms")
@@ -49,8 +72,9 @@ class Lobby(threading.Thread):
 
     def on_session_message(self, session, message):
         logging.debug("Received message {0} from user {1}".format(message, session.username))
-        if message["action"] == "chat":
-            self.broadcast(session, message)
+        if message["action"] in self.handlers:
+            self.handlers[message["action"]](session, message)
+
 
     def broadcast(self, from_session, message):
         logging.debug("Broadcasting message {0} on lobby".format(message))
@@ -73,5 +97,6 @@ class Lobby(threading.Thread):
                         self.sessions[user].write(message)
                 finally:
                     self.message_queue.task_done()
+
             except Exception,e:
                 logging.error("Error on lobby broadcast thread: {0}".format(e))

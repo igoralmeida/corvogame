@@ -19,7 +19,7 @@ import logging
 class RawHandler(object):
     def from_string(self, raw_string):
         data = raw_string.strip()
-        return (True, [data], "")
+        return (True, [data], [], "")
 
     def to_string(self,message):
         pass

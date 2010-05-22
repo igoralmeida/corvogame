@@ -23,23 +23,30 @@ class Handler(object):
         assert type(raw_message) == str
         output = []
         errors = []
+        index = 0
 
-        if raw_message.rfind("\n") >= 0:
-            messages = raw_message.strip().split('\n')
-            logging.debug("Trying to process: [{0}]".format(messages))
+        r_index = raw_message.find('\n', index)
 
-            for message in messages:
-                try:
-                    msg = json.loads(message)
-                    output.append(msg)
-                except Exception, e:
-                    logging.debug("Error processing input: {0}".format(e))
-                    errors.append({ "error" : "Malformed input" })
+        while r_index >= 0:
+            logging.debug("Index is {0}, r_index is {1}".format(index, r_index))
 
-        return (True, output, errors)
+            try:
+                message = raw_message[index:r_index].rstrip()
+                logging.debug("Trying to process: [{0}]".format(message))
+                msg = json.loads(message)
+                output.append(msg)
+            except Exception, e:
+                logging.debug("Error processing input: {0}".format(e))
+                errors.append({ u"action" : u"error" , u"reason" : u"Malformed input", u'raw_text' : message })
+
+            index = r_index + 1
+            r_index = raw_message.find('\n', index)
+
+        logging.debug("raw message length: {0}, index {1}".format(len(raw_message),index))
+        return (True, output, errors, raw_message[index:])
 
     def to_string(self, message):
-        logging.debug("Trying to decode input: {0}".format(message))
+        logging.debug("Trying to decode input of type {1} : {0}".format(message, type(message)))
         try:
             return json.dumps(message) + "\r\n"
         except e:
