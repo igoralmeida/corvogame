@@ -24,7 +24,7 @@ class ClientHandler(asyncore.dispatcher):
     TODO: thread/tasklets for buffer incoming handling as passing all data on the same socket thread
           can be hazardous
     '''
-    def __init__(self, conn):
+    def __init__(self, conn=None):
         logging.debug("Initializing ClientHandler")
         asyncore.dispatcher.__init__(self, conn)
         self.message_handler = None
@@ -47,6 +47,7 @@ class ClientHandler(asyncore.dispatcher):
     def handle_read(self):
         ''' reads some data and call the current handler '''
         if self.message_handler and self.read_handler:
+            print self.read_handler
             data = self.recv(8192)
 
             logging.debug("Data is {0}".format(len(data)))

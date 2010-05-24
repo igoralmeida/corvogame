@@ -19,36 +19,25 @@ import sys
 sys.path.append('..')
 
 from common import json_handler
-import server_listener
-import simple_auth
-import lobby as l
 import asyncore
 import logging
+import client_connection
 
 logging.basicConfig(level=logging.DEBUG, format= '%(asctime)s %(levelname)-8s %(module)-20s[%(lineno)-3d] %(message)s')
 
-lobby = l.Lobby()
-
-def add_to_lobby(session):
-    lobby.handshake(session)
-
 if __name__ == "__main__":
     logging.debug("Starting corvogame...")
-    server = server_listener.ServerListener("0.0.0.0", 5000)
+    client = client_connection.Client("127.0.0.1", 5000)
 
-    server.register_auth_handler(simple_auth.authenticate)
-    server.register_message_handler("json", json_handler.Handler() )
-    server.register_logon_handler(add_to_lobby)
+    client.register_message_handler("json", json_handler.Handler())
 
     try:
         logging.info("Corvogame is running...")
         asyncore.loop(timeout=1.0)
     except KeyboardInterrupt:
-        logging.info("Closing corvogame server")
-        logging.debug("Stopping lobby")
-        lobby.stop()
-        logging.debug("done")
-        logging.debug("Stopping server")
-        server.shutdown()
+        logging.info("Closing corvogame client")
+        logging.debug("Stopping client")
+        client.shutdown()
         logging.debug("done")
         logging.info("Shutdown complete.")
+
