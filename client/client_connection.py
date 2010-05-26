@@ -15,6 +15,7 @@
 #    along with corvogame.  If not, see <http://www.gnu.org/licenses/>.
 
 from common import client_handler
+import config
 import asyncore
 import socket
 import logging
@@ -25,17 +26,25 @@ def debug(str):
 
 class Client(client_handler.ClientHandler):
     ''' Basic TCP client. '''
-    def __init__(self, ip, port):
+    def __init__(self, ip=None, port=None):
         client_handler.ClientHandler.__init__(self)
         logging.debug("Initializing Client...")
 
+        self.Cfg = config.Config()
+
         self.message_handlers = {}
+
         self.ip = ip
+        if ip is None:
+            self.ip = self.Cfg.server
+
         self.port = port
+        if port is None:
+            self.port = int(self.Cfg.port) # may come from ConfigParser
 
         asyncore.dispatcher.__init__(self)
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connect((ip,port))
+        self.connect((self.ip,self.port))
 
     def register_message_handler(self, protocol, handler):
         ''' Register message handlers. Used to make the client abstract on how
@@ -48,6 +57,6 @@ class Client(client_handler.ClientHandler):
         logging.debug("Client is shutting down...")
 
     def handle_connect(self):
-        self.obuffer.append('json') # TODO select protocol from configuration
+        self.obuffer.append(self.Cfg.protocol)
         self.read_handler = debug
 

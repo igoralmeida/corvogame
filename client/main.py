@@ -27,7 +27,7 @@ logging.basicConfig(level=logging.DEBUG, format= '%(asctime)s %(levelname)-8s %(
 
 if __name__ == "__main__":
     logging.debug("Starting corvogame...")
-    client = client_connection.Client("127.0.0.1", 5000)
+    client = client_connection.Client()
 
     client.register_message_handler("json", json_handler.Handler())
 
