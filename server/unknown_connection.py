@@ -53,8 +53,8 @@ class UnknownConnectionHandler(client_handler.ClientHandler):
             self.message_handler = self.server.message_handlers[data]
             self.write(self.message_handler.to_string({ u'action' : 'connection_response', u'result' : u'Protocol accepted. Using {0}'.format(data) }))
             #TODO: REMOVE THIS, TEST ONLY
-            self.username ='user'
-            self.server.promote_to_session(self, self.message_handler, self.addr)
+            #self.username ='user'
+            #self.server.promote_to_session(self, self.message_handler, self.addr)
         else:
             logging.info("rejecting {1} due to invalid protocol: {0} ".format(data, self.socket))
             self.write("Invalid protocol type: {0}\r\n".format(data))
