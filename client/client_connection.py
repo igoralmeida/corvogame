@@ -20,9 +20,9 @@ import asyncore
 import socket
 import logging
 
-def debug(str):
-    logging.debug("Read from socket:")
-    logging.debug(str)
+def debug(s):
+    logging.debug("--------------- Read from socket:")
+    logging.debug(s)
 
 class Client(client_handler.ClientHandler):
     ''' Basic TCP client. '''

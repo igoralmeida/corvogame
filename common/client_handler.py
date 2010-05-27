@@ -47,7 +47,6 @@ class ClientHandler(asyncore.dispatcher):
     def handle_read(self):
         ''' reads some data and call the current handler '''
         if self.message_handler and self.read_handler:
-            print self.read_handler
             data = self.recv(8192)
 
             logging.debug("Data is {0}".format(len(data)))
