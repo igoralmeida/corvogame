@@ -53,18 +53,31 @@ class Client(client_handler.ClientHandler):
         self.message_handlers[protocol] = handler
         self.message_handler = handler
 
+    #TODO remove from this class
     def connection_response_handler(self, message):
         ''' Continue conversation: if protocol is accepted, send login info. '''
         #TODO implement fallback to some other protocol if not accepted
 
         if (message[u'action'] == u'connection_response' and
             message[u'result'].startswith('Protocol accepted.')):
-            self.read_handler = debug #FIXME what if next msg==action:session_*?
+            self.read_handler = self.logon_response_handler
+            #FIXME what if next msg==action:session_*?
 
             logon_dict = { u'action' : 'login', u'username' : self.Cfg.username, u'password' : self.Cfg.password }
             logon_message = self.message_handler.to_string(logon_dict)
             self.write(logon_message)
 
+    #TODO remove from this class
+    def logon_response_handler(self, message):
+        ''' Check if server acknowledges our authentication '''
+
+        if message[u'action'] == u'logon_response':
+            if message[u'result'] == u'connected successfully':
+                logging.info("Successful authentication as {0}".format(self.Cfg.username))
+                self.read_handler = debug
+            else:
+                #TODO ask for login information again
+                pass
 
     def shutdown(self):
         logging.debug("Client is shutting down...")

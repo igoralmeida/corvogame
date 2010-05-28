@@ -76,7 +76,7 @@ class UnknownConnectionHandler(client_handler.ClientHandler):
                 logging.debug("Authentication suceed, promoting to session")
                 self.username = username
                 logging.debug(self.message_handler.to_string)
-                self.write(self.message_handler.to_string({ u'action' : 'logon_response', u'result' : u'connected sucessfully' }))
+                self.write(self.message_handler.to_string({ u'action' : 'logon_response', u'result' : u'connected successfully' }))
                 self.server.promote_to_session(self, self.message_handler, self.addr)
 
         except KeyError,AssertionError:
