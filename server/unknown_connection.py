@@ -49,7 +49,7 @@ class UnknownConnectionHandler(client_handler.ClientHandler):
 
         if data in self.server.message_handlers:
             logging.info("promoting {1} to {0} protocol: ".format(data, self.socket))
-            #self.read_handler = self._auth_handler
+            self.read_handler = self._auth_handler
             self.message_handler = self.server.message_handlers[data]
             self.write(self.message_handler.to_string({ u'action' : 'connection_response', u'result' : u'Protocol accepted. Using {0}'.format(data) }))
             #TODO: REMOVE THIS, TEST ONLY

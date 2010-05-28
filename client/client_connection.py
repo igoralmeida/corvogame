@@ -57,12 +57,11 @@ class Client(client_handler.ClientHandler):
         ''' Continue conversation: if protocol is accepted, send login info. '''
         #TODO implement fallback to some other protocol if not accepted
 
-        #FIXME message[action] != connection_response, why?
-        if (message[u'action'] is u'connection_response' and
+        if (message[u'action'] == u'connection_response' and
             message[u'result'].startswith('Protocol accepted.')):
             self.read_handler = debug #FIXME what if next msg==action:session_*?
 
-            logon_dict = { u'action' : 'logon', u'username' : self.Cfg.username, u'password' : self.Cfg.password }
+            logon_dict = { u'action' : 'login', u'username' : self.Cfg.username, u'password' : self.Cfg.password }
             logon_message = self.message_handler.to_string(logon_dict)
             self.write(logon_message)
 
