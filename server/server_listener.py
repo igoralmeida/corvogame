@@ -67,6 +67,12 @@ class ServerListener(asyncore.dispatcher):
     def shutdown(self):
         logging.debug("server listener is shutting down...")
 
+    def promote_to_unknown_connection(self, conn, addr, handler = None):
+        uc = unknown_connection.UnknownConnectionHandler(conn, self, addr)
+        self.pending_sessions[addr] = uc
+        if handler:
+            uc.upgrade_protocol_handler(handler)
+
     def promote_to_session(self, unknown_connection, protocol, address):
         logging.debug("Promoting {0} to a session".format(unknown_connection))
         s = session.Session(unknown_connection)

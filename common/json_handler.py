@@ -18,6 +18,12 @@ import json
 import logging
 
 class Handler(object):
+    
+    NAME = 'json'
+    
+    def __init__(self, separator = '\n'):
+        self.separator = separator
+        
     def from_string(self, raw_message):
         ''' Basic reader. Searches for endlines, strip unused character's and tries to parse them as json objects '''
         assert type(raw_message) == str
@@ -25,7 +31,7 @@ class Handler(object):
         errors = []
         index = 0
 
-        r_index = raw_message.find('\n', index)
+        r_index = raw_message.find(self.separator, index)
 
         while r_index >= 0:
             logging.debug("Index is {0}, r_index is {1}".format(index, r_index))
@@ -48,6 +54,6 @@ class Handler(object):
     def to_string(self, message):
         logging.debug("Trying to decode input of type {1} : {0}".format(message, type(message)))
         try:
-            return json.dumps(message) + "\r\n"
+            return json.dumps(message)
         except e:
             logging.debug("Error processing output: {0}".format(e))

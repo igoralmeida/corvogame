@@ -18,12 +18,14 @@
 import sys
 sys.path.append('..')
 
-from common import json_handler
+from common import json_handler, websocket_handler
+
 import server_listener
 import simple_auth
 import lobby as l
 import asyncore
 import logging
+import websocket
 
 logging.basicConfig(level=logging.DEBUG, format= '%(asctime)s %(levelname)-8s %(module)-20s[%(lineno)-3d] %(message)s')
 
@@ -34,7 +36,9 @@ def add_to_lobby(session):
 
 if __name__ == "__main__":
     logging.debug("Starting corvogame...")
-    server = server_listener.ServerListener("0.0.0.0", 5000)
+
+    server = server_listener.ServerListener("localhost", 5000)
+    websocket_server = websocket.WebsocketListener("localhost", 1234, server)
 
     server.register_auth_handler(simple_auth.authenticate)
     server.register_message_handler("json", json_handler.Handler() )
@@ -48,7 +52,8 @@ if __name__ == "__main__":
         logging.debug("Stopping lobby")
         lobby.stop()
         logging.debug("done")
-        logging.debug("Stopping server")
+        logging.debug("Stopping servers")
         server.shutdown()
+        websocket_server.shutdown()
         logging.debug("done")
         logging.info("Shutdown complete.")

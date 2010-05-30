@@ -18,6 +18,8 @@ from common import client_handler
 import logging
 
 class RawHandler(object):
+    NAME = 'raw_string'
+
     def from_string(self, raw_string):
         data = raw_string.strip()
         return (True, [data], [], "")
@@ -34,14 +36,20 @@ class UnknownConnectionHandler(client_handler.ClientHandler):
 
     def __init__(self, conn, server, addr):
         ''' Starts the handler and define the read method as 'not protocol enabled yet' '''
-
         logging.debug("Instantiating an unknown connection handler for connection {0}".format(addr))
         client_handler.ClientHandler.__init__(self, conn)
         self.server = server
-        self.write("Welcome to corvogame! Please input your protocol: ")
+        self.message_handler = None
         self.read_handler = self._unknown_protocol_message
+        #self.write("Welcome to corvogame! Please input your protocol: ")
         self.message_handler = RawHandler()
         self.addr = addr
+
+    def upgrade_protocol_handler(self, to_handler):
+        logging.debug("Upgrading protocol to handler {0} and setting to auth mode".format(to_handler))
+        self.read_handler = self._auth_handler
+        self.message_handler = to_handler
+        self.write(self.message_handler.to_string({ u'action' : 'connection_response', u'result' : u'Protocol accepted. Using {0}'.format(to_handler.NAME) }))
 
     def _unknown_protocol_message(self, data):
         ''' handshake handler. basically it checks if the client has inputted an
@@ -49,12 +57,7 @@ class UnknownConnectionHandler(client_handler.ClientHandler):
 
         if data in self.server.message_handlers:
             logging.info("promoting {1} to {0} protocol: ".format(data, self.socket))
-            #self.read_handler = self._auth_handler
-            self.message_handler = self.server.message_handlers[data]
-            self.write(self.message_handler.to_string({ u'action' : 'connection_response', u'result' : u'Protocol accepted. Using {0}'.format(data) }))
-            #TODO: REMOVE THIS, TEST ONLY
-            self.username ='user'
-            self.server.promote_to_session(self, self.message_handler, self.addr)
+            upgrade_protocol_handler(self.server.message_handlers[data])
         else:
             logging.info("rejecting {1} due to invalid protocol: {0} ".format(data, self.socket))
             self.write("Invalid protocol type: {0}\r\n".format(data))
