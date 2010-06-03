@@ -2,6 +2,9 @@
 Interacao com lobby
 Chat
 
+####################  PROBLEMAS CONHECIDOS  ######################
+Conectar sem servidor rodando: erro em handle_error
+
 ####################  BACKLOG DO CLIENT ######################
 
 linguagem: python
