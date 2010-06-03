@@ -22,9 +22,7 @@ class Lobby(threading.Thread):
 
         del self.sessions[session.username]
 
-        msg = {}
-        msg["action"] = "session_logout"
-        msg["user"] = session.username
+        msg = { u'action' : 'session_logout', u'username' : session.username }
 
         self.broadcast({u'session' : 'lobby'} , msg)
 

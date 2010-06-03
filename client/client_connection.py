@@ -15,14 +15,12 @@
 #    along with corvogame.  If not, see <http://www.gnu.org/licenses/>.
 
 from common import client_handler
+from debug import debug
+import lobby_handler
 import config
 import asyncore
 import socket
 import logging
-
-def debug(s):
-    logging.debug("--------------- Read from socket:")
-    logging.debug(s)
 
 class Client(client_handler.ClientHandler):
     ''' Basic TCP client. '''
@@ -74,10 +72,17 @@ class Client(client_handler.ClientHandler):
         if message[u'action'] == u'logon_response':
             if message[u'result'] == u'connected successfully':
                 logging.info("Successful authentication as {0}".format(self.Cfg.username))
-                self.read_handler = debug
+                self.handover_to_lobbyhandler()
             else:
                 #TODO ask for login information again
                 pass
+
+    def handover_to_lobbyhandler(self):
+        lh = lobby_handler.LobbyHandler(self.socket, self.Cfg,
+            self.message_handler)
+        lh.inbuffer = self.inbuffer
+
+        #TODO delete my instance
 
     def shutdown(self):
         logging.debug("Client is shutting down...")
