@@ -71,7 +71,7 @@ class LobbyHandler(client_handler.ClientHandler):
 
     def add_user(self, name):
         if name not in self.users:
-            self.users.append({u'username': name})
+            self.users.update({name: {u'username': name}})
 
     def remove_user(self, name):
         if name in self.users:
