@@ -15,14 +15,12 @@
 #    along with corvogame.  If not, see <http://www.gnu.org/licenses/>.
 
 from common import client_handler
+from debug import debug
+import lobby_handler
 import config
 import asyncore
 import socket
 import logging
-
-def debug(s):
-    logging.debug("--------------- Read from socket:")
-    logging.debug(s)
 
 class Client(client_handler.ClientHandler):
     ''' Basic TCP client. '''
@@ -53,10 +51,43 @@ class Client(client_handler.ClientHandler):
         self.message_handlers[protocol] = handler
         self.message_handler = handler
 
+    #TODO remove from this class
+    def connection_response_handler(self, message):
+        ''' Continue conversation: if protocol is accepted, send login info. '''
+        #TODO implement fallback to some other protocol if not accepted
+
+        if (message[u'action'] == u'connection_response' and
+            message[u'result'].startswith('Protocol accepted.')):
+            self.read_handler = self.logon_response_handler
+            #FIXME what if next msg==action:session_*?
+
+            logon_dict = { u'action' : 'login', u'username' : self.Cfg.username, u'password' : self.Cfg.password }
+            logon_message = self.message_handler.to_string(logon_dict)
+            self.write(logon_message)
+
+    #TODO remove from this class
+    def logon_response_handler(self, message):
+        ''' Check if server acknowledges our authentication '''
+
+        if message[u'action'] == u'logon_response':
+            if message[u'result'] == u'connected successfully':
+                logging.info("Successful authentication as {0}".format(self.Cfg.username))
+                self.handover_to_lobbyhandler()
+            else:
+                #TODO ask for login information again
+                pass
+
+    def handover_to_lobbyhandler(self):
+        lh = lobby_handler.LobbyHandler(self.socket, self.Cfg,
+            self.message_handler)
+        lh.inbuffer = self.inbuffer
+
+        #TODO delete my instance
+
     def shutdown(self):
         logging.debug("Client is shutting down...")
 
     def handle_connect(self):
-        self.obuffer.append(self.Cfg.protocol)
-        self.read_handler = debug
+        self.read_handler = self.connection_response_handler
+        self.write(self.Cfg.protocol)
 

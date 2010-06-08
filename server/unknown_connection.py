@@ -58,6 +58,7 @@ class UnknownConnectionHandler(client_handler.ClientHandler):
         if data in self.server.message_handlers:
             logging.info("promoting {1} to {0} protocol: ".format(data, self.socket))
             upgrade_protocol_handler(self.server.message_handlers[data])
+
         else:
             logging.info("rejecting {1} due to invalid protocol: {0} ".format(data, self.socket))
             self.write("Invalid protocol type: {0}\r\n".format(data))
@@ -79,7 +80,7 @@ class UnknownConnectionHandler(client_handler.ClientHandler):
                 logging.debug("Authentication suceed, promoting to session")
                 self.username = username
                 logging.debug(self.message_handler.to_string)
-                self.write(self.message_handler.to_string({ u'action' : 'logon_response', u'result' : u'connected sucessfully' }))
+                self.write(self.message_handler.to_string({ u'action' : 'logon_response', u'result' : u'connected successfully' }))
                 self.server.promote_to_session(self, self.message_handler, self.addr)
 
         except KeyError,AssertionError:

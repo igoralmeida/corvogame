@@ -20,6 +20,6 @@ msc {
 	Client->UnknownConnectionHandler [ label = "action,user,passwd", ID="*" ];
 	...;
 	|||;
-	--- [ label = "*formato json: {'action':'logon','username':'user','password':'password'}" ];
+	--- [ label = "*formato json: {'action':'login','username':'user','password':'password'}" ];
 
 }
