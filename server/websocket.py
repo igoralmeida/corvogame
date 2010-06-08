@@ -24,7 +24,7 @@ class WebsocketListener(asyncore.dispatcher):
             data = conn.recv(255)
 
             if 'HTTP' in data:
-                conn.send("HTTP/1.1 101 Web Socket Protocol Handshake\r\n"+"Upgrade: WebSocket\r\n"+"Connection: Upgrade\r\n"+"WebSocket-Origin: http://localhost:8000\r\n"+"WebSocket-Location: "+" ws://localhost:1234/websession\r\n\r\n")
+                conn.send("HTTP/1.1 101 Web Socket Protocol Handshake\r\n"+"Upgrade: WebSocket\r\n"+"Connection: Upgrade\r\n"+"WebSocket-Origin: null\r\n" +"WebSocket-Location: "+" ws://192.168.1.136:1234/websession\r\n\r\n")
 
             self.server.promote_to_unknown_connection(conn, addr, websocket_handler.WebsocketHandler())
 

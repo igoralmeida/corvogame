@@ -49,7 +49,7 @@ class ClientHandler(asyncore.dispatcher):
         if self.message_handler and self.read_handler:
             data = self.recv(8192)
 
-            logging.debug("Data is {0}".format(len(data)))
+            logging.debug("Data is {0}, message_handler is {1}".format(data,self.message_handler))
 
             if not data:
                 self.shutdown()
@@ -86,7 +86,8 @@ class ClientHandler(asyncore.dispatcher):
                     self.inbuffer = rest
                 else:
                     self.inbuffer = self.inbuffer + rest
-            except:
+            except Exception,e:
+                logging.error("{0}".format(e))
                 self.shutdown()
 
     def handle_error(self, _type, value, traceback ):
@@ -100,6 +101,7 @@ class ClientHandler(asyncore.dispatcher):
             return
 
         sent = self.send(self.obuffer[0])
+        logging.debug("Sent {0} bytes".format(sent))
         if sent >= len(self.obuffer[0]):
             self.obuffer.pop(0)
         else:

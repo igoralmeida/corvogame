@@ -32,7 +32,7 @@ class Handler(object):
         index = 0
 
         r_index = raw_message.find(self.separator, index)
-
+        logging.debug("Trying to find {0}: index is {1}".format(self.separator, r_index))
         while r_index >= 0:
             logging.debug("Index is {0}, r_index is {1}".format(index, r_index))
 
@@ -48,8 +48,8 @@ class Handler(object):
             index = r_index + 1
             r_index = raw_message.find('\n', index)
 
-        logging.debug("raw message length: {0}, index {1}".format(len(raw_message),index))
-        return (True, output, errors, raw_message[index:])
+        logging.debug("raw message length: {0}, output {1} errors {2} raw_message {3}".format(len(raw_message),index))
+        return (True, output, errors, raw_message[index + 1:])
 
     def to_string(self, message):
         logging.debug("Trying to decode input of type {1} : {0}".format(message, type(message)))

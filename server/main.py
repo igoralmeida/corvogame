@@ -37,8 +37,8 @@ def add_to_lobby(session):
 if __name__ == "__main__":
     logging.debug("Starting corvogame...")
 
-    server = server_listener.ServerListener("localhost", 5000)
-    websocket_server = websocket.WebsocketListener("localhost", 1234, server)
+    server = server_listener.ServerListener("192.168.1.136", 5000)
+    websocket_server = websocket.WebsocketListener("192.168.1.136", 1234, server)
 
     server.register_auth_handler(simple_auth.authenticate)
     server.register_message_handler("json", json_handler.Handler() )
