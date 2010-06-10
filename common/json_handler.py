@@ -21,7 +21,7 @@ class Handler(object):
     
     NAME = 'json'
     
-    def __init__(self, separator = '\n'):
+    def __init__(self, separator = '\r\n'):
         self.separator = separator
         
     def from_string(self, raw_message):
@@ -40,15 +40,16 @@ class Handler(object):
                 message = raw_message[index:r_index].rstrip()
                 logging.debug("Trying to process: [{0}]".format(message))
                 msg = json.loads(message)
+                logging.debug("Parsed {0}".format(msg))
                 output.append(msg)
+                index = r_index + len(self.separator)
+                r_index = raw_message.find('\n', index)
+                logging.debug("index is {0}, r_index is {1}".format(index, r_index))
             except Exception, e:
                 logging.debug("Error processing input: {0}".format(e))
-                errors.append({ u"action" : u"error" , u"reason" : u"Malformed input", u'raw_text' : message })
+                errors.append({ u"action" : u"error" , u"reason" : u"Malformed input", u'raw_text' : message })            
 
-            index = r_index + 1
-            r_index = raw_message.find('\n', index)
-
-        logging.debug("raw message length: {0}, output {1} errors {2} raw_message {3}".format(len(raw_message),index))
+        logging.debug("raw message length: {0}, output {1} errors {2} raw_message {3}".format(len(raw_message),output, errors, raw_message))
         return (True, output, errors, raw_message[index + 1:])
 
     def to_string(self, message):
