@@ -11,7 +11,7 @@ class Lobby(broadcastable.Broadcastable):
         self.sessions = {}
         self.channels = {}
         self.games = {}
-        
+
         self.handlers =  { 'chat' : self.handle_chat , 'quit' : self.handle_session_quit }
         self.start()
 
@@ -28,7 +28,7 @@ class Lobby(broadcastable.Broadcastable):
         if name not in self.games:
             self.games[name] = []
             self.games[name].append((version, game_builder))
-        
+
     def handle_chat(self, session, message):
         logging.debug("Handling chat message")
         message["action"] = u'lobby_chat'

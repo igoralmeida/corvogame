@@ -26,7 +26,7 @@ class Session(ClientHandler):
         self.read_handler = self.handle_session_messages
         self.incoming_message_handler = None
         self.close_handler = None
-        
+
     def handle_session_messages(self, message):
         logging.debug("Received message {0} from session user {1}".format(message, self.username))
         if self.incoming_message_handler:
