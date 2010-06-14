@@ -57,7 +57,7 @@ class UnknownConnectionHandler(client_handler.ClientHandler):
 
         if data in self.server.message_handlers:
             logging.info("promoting {1} to {0} protocol: ".format(data, self.socket))
-            upgrade_protocol_handler(self.server.message_handlers[data])
+            self.upgrade_protocol_handler(self.server.message_handlers[data])
 
         else:
             logging.info("rejecting {1} due to invalid protocol: {0} ".format(data, self.socket))

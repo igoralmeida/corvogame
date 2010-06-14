@@ -47,7 +47,8 @@ class Handler(object):
                 logging.debug("index is {0}, r_index is {1}".format(index, r_index))
             except Exception, e:
                 logging.debug("Error processing input: {0}".format(e))
-                errors.append({ u"action" : u"error" , u"reason" : u"Malformed input", u'raw_text' : message })            
+                errors.append({ u"action" : u"error" , u"reason" : u"Malformed input", u'raw_text' : message })    
+                break
 
         logging.debug("raw message length: {0}, output {1} errors {2} raw_message {3}".format(len(raw_message),output, errors, raw_message))
         return (True, output, errors, raw_message[index + 1:])

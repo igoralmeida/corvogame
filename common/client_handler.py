@@ -17,6 +17,7 @@
 import asyncore
 import socket
 import logging
+import traceback
 
 class ClientHandler(asyncore.dispatcher):
     ''' Basic low level handler. Implents write capabilities, as some other useful methods
@@ -87,12 +88,8 @@ class ClientHandler(asyncore.dispatcher):
                 else:
                     self.inbuffer = self.inbuffer + rest
             except Exception,e:
-                logging.error("{0}".format(e))
+                logging.error("{0}".format(traceback.print_stack()))
                 self.shutdown()
-
-    def handle_error(self, _type, value, traceback ):
-        logging.debug("Tracked an session error of type {0} and value {1}\n Traceback {2}".format(_type, value, traceback))
-        self.close()
 
     def handle_write(self):
         logging.debug("Handle write: {0}".format(self.obuffer))
