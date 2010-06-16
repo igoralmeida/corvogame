@@ -27,7 +27,7 @@ class LobbyHandler(client_handler.ClientHandler):
     information with lobby on server
     '''
 
-    def __init__(self, sock, cfg, msg_handler):
+    def __init__(self, sock, cfg, msg_handler, ui=None):
         client_handler.ClientHandler.__init__(self, sock)
         logging.debug("Initializing LobbyHandler...")
 
@@ -35,6 +35,10 @@ class LobbyHandler(client_handler.ClientHandler):
 
         self.message_handler = msg_handler
         self.read_handler = self.lobby_parse
+
+        self.ui = ui
+        if ui is not None:
+            self.ui.register_connection_handler(self)
 
         self.rooms = []
         self.users = {} #{'name':{username:'name',...}, 'name2':...}
@@ -49,12 +53,14 @@ class LobbyHandler(client_handler.ClientHandler):
             }[action](message[u'username'])
 
     def logon_bcast(self, user):
-        print '=-=- User {0} logs in'.format(user)
         self.add_user(user)
+        self.signal_ui({u'action': 'logon', u'user': user})
+        logging.info('User {0} logs in'.format(user))
 
     def logout_bcast(self, user):
-        print '=-=- User logs out'.format(user)
         self.remove_user(user)
+        self.signal_ui({u'action': 'logosut', u'user': user})
+        logging.info('User logs out'.format(user))
 
     def lobby_parse(self, message):
         if message[u'action'] == u'lobby_info':
@@ -63,6 +69,20 @@ class LobbyHandler(client_handler.ClientHandler):
             self.update_users(message[u'users'])
 
         self.read_handler = self.common_parse
+
+    def chat_send(self, text):
+        # TODO entender a mensagem de chat no lobby
+        message = { u'action': 'chat', u'text': text }
+        pass
+
+    def signal_ui(self, message):
+        if self.ui is not None:
+            if message[u'action'] == u'chat':
+                self.ui.chat_received(message)
+            elif message[u'action'] == u'logon':
+                self.ui.user_logon(message[u'user'])
+            elif message[u'action'] == u'logout':
+                self.ui.user_logout(message[u'user'])
 
     def update_users(self, user_dicts):
         for i in user_dicts:

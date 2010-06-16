@@ -24,7 +24,7 @@ import logging
 
 class Client(client_handler.ClientHandler):
     ''' Basic TCP client. '''
-    def __init__(self, ip=None, port=None):
+    def __init__(self, ip=None, port=None, ui=None):
         client_handler.ClientHandler.__init__(self)
         logging.debug("Initializing Client...")
 
@@ -40,9 +40,17 @@ class Client(client_handler.ClientHandler):
         if port is None:
             self.port = int(self.Cfg.port) # may come from ConfigParser
 
+        self.ui = ui
+        if ui is not None:
+            self.ui.register_connection_handler(self)
+
         asyncore.dispatcher.__init__(self)
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connect((self.ip,self.port))
+
+    def signal_ui(self, message):
+        if self.ui is not None:
+            pass
 
     def register_message_handler(self, protocol, handler):
         ''' Register message handlers. Used to make the client abstract on how
@@ -78,8 +86,8 @@ class Client(client_handler.ClientHandler):
                 pass
 
     def handover_to_lobbyhandler(self):
-        lh = lobby_handler.LobbyHandler(self.socket, self.Cfg,
-            self.message_handler)
+        lh = lobby_handler.LobbyHandler(sock=self.socket, cfg=self.Cfg,
+            msg_handler=self.message_handler, ui=self.ui)
         lh.inbuffer = self.inbuffer
 
         #TODO delete my instance

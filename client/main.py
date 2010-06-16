@@ -22,14 +22,17 @@ from common import json_handler
 import asyncore
 import logging
 import client_connection
+import cli_ui.Cli_Ui as ui
 
 logging.basicConfig(level=logging.DEBUG, format= '%(asctime)s %(levelname)-8s %(module)-20s[%(lineno)-3d] %(message)s')
 
 if __name__ == "__main__":
     logging.debug("Starting corvogame...")
-    client = client_connection.Client()
+    interface = ui()
+    client = client_connection.Client(ui=interface)
 
     client.register_message_handler("json", json_handler.Handler())
+
 
     try:
         logging.info("Corvogame is running...")
