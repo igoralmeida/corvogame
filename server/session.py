@@ -16,6 +16,7 @@
 
 from common.client_handler import ClientHandler
 import logging
+import uuid
 
 class Session(ClientHandler):
     def __init__(self, unknown_connection):
@@ -25,6 +26,7 @@ class Session(ClientHandler):
         self.message_handler = unknown_connection.message_handler
         self.read_handler = self.handle_session_messages
         self.incoming_message_handler = None
+        self.user_id = uuid.uuid1().get_hex()
         self.close_handler = None
 
     def handle_session_messages(self, message):

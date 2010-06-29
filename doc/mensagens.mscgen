@@ -1,6 +1,6 @@
 #Informacoes: http://www.mcternan.me.uk/mscgen/index.html
 msc {
-	Client,Server,UnknownConnectionHandler,MessageHandler,AuthHandler;
+	Client,Server,MessageHandler,AuthHandler, Lobby, UnknownConnectionHandler;
 
 	Server<=Server [ label = "bind + listen" ] ;
 	Server<<MessageHandler [ label = "protocolo" ];
@@ -11,15 +11,18 @@ msc {
 	--- [ label = "inicio de uma conexao [1]" ];
 	Client->Server [ label = "handle_accept()" ] ;
 	Server=>UnknownConnectionHandler [ label = "__init__()" ] ;
-	Client<-UnknownConnectionHandler [ label = "Welcome..., protocol?" ] ;
-
+	
 	--- [ label = "selecao do protocolo [2]" ];
 	Client->UnknownConnectionHandler [ label = "json" ] ;
 
 	--- [ label = "autenticacao [3] " ];
-	Client->UnknownConnectionHandler [ label = "action,user,passwd", ID="*" ];
-	...;
+        ...;
 	|||;
-	--- [ label = "*formato json: {'action':'login','username':'user','password':'password'}" ];
-
+        Client->UnknownConnectionHandler [ label = "*formato json: {'action':'login','username':'user','password':'password'}" ];
+        UnknownConnectionHandler>>Client [ label = "{'action':'logon_response','result':'result'}" ];
+        |||;
+        Lobby->Client [ label = "*formato json: {'action':'lobby_info','rooms':'rooms','users':'users'}" ];
+        Client->Lobby [ label = "*formato json: {'action':'lobby_chat','sender':'user','message':'message'}" ];
+        --- [ label = "para cada cliente no lobby" ];
+        Lobby->Client [ label = "*formato json: {'action':'lobby_chat','sender':'user','message':'message'}" ];
 }
