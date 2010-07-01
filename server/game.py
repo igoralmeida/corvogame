@@ -13,20 +13,17 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with corvogame.  If not, see <http://www.gnu.org/licenses/>.
-from json_handler import Handler
-import logging
 
-class WebsocketHandler(Handler):
-    NAME = 'json_websocket'
+class Game:
+    VERSION = 0.0.0
+    NAME= "NOT_SPECIFIED"
+    MAX_PLAYERS = 6
 
-    def __init__(self):
-        Handler.__init__(self, '\xff')
+    def start(self):
+        pass
 
-    def from_string(self, raw_message):
-        raw_message= raw_message[1:]
-        logging.debug("Raw message is {0}".format(raw_message))
-        Handler.from_string(self, raw_message)
+    def stop(self):
+        pass
 
-    def to_string(self, message):
-        encoded_msg = Handler.to_string(self, message)
-        return '\x00' + encoded_msg.encode('utf-8')
+    def register_session(self, session):
+        pass

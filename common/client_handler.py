@@ -56,40 +56,36 @@ class ClientHandler(asyncore.dispatcher):
                 self.shutdown()
                 return
 
-            try:
-                (status, messages, error, rest) = self.message_handler.from_string(data)
-                logging.debug("readed {0} status is {1} error is {3} Rest is [{2}]".format(messages,status,rest,error))
-                assert type(messages) == list
+            (status, messages, error, rest) = self.message_handler.from_string(data)
+            logging.debug("readed {0} status is {1} error is {3} Rest is [{2}]".format(messages,status,rest,error))
+            assert type(messages) == list
 
-                if status == True:
-                    for message in messages:
-                        logging.debug("Callig read_handler {0} to message: {1}".format(self.read_handler, message))
-                        self.read_handler(message)
+            if status == True:
+                for message in messages:
+                    logging.debug("Callig read_handler {0} to message: {1}".format(self.read_handler, message))
+                    self.read_handler(message)
 
-                    if messages:
-                        self.error_count = 0
+                if messages:
+                    self.error_count = 0
 
-                    for e in error:
-                        logging.debug("Replying parsing error to {0}: {1}".format(self.message_handler, e))
-                        self.write(e)
-                        self.error_count += len(error)
+                for e in error:
+                    logging.debug("Replying parsing error to {0}: {1}".format(self.message_handler, e))
+                    self.write(e)
+                    self.error_count += len(error)
 
-                    if self.error_count > 5:
-                        msg = {}
-                        msg["action"] = u'disconnect'
-                        msg["reason"] = u'Too many protocol errors'
+                if self.error_count > 5:
+                    msg = {}
+                    msg["action"] = u'disconnect'
+                    msg["reason"] = u'Too many protocol errors'
 
-                        self.write(msg)
-                        self.shutdown()
+                    self.write(msg)
+                    self.shutdown()
 
-                        return
+                    return
 
-                    self.inbuffer = rest
-                else:
-                    self.inbuffer = self.inbuffer + rest
-            except Exception,e:
-                logging.error("{0}".format(traceback.print_stack()))
-                self.shutdown()
+                self.inbuffer = rest
+            else:
+                self.inbuffer = self.inbuffer + rest
 
     def handle_write(self):
         logging.debug("Handle write: {0}".format(self.obuffer))

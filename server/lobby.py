@@ -12,17 +12,24 @@ class Lobby(broadcastable.Broadcastable):
         self.channels = {}
         self.games = {}
 
-        self.handlers =  { 'chat' : self.handle_chat , 'quit' : self.handle_session_quit }
+        self.handlers =  { 'lobby_chat' : self.handle_chat ,
+                           'lobby_quit' : self.handle_session_quit,
+                           'lobby_create_room' : self.handle_create_room }
         self.start()
 
-    def handle_session_quit(session, message):
+    def handle_session_quit(self, session, message):
         logging.debug("Handling session quit")
 
-        del self.sessions[session.username]
-        msg = { u'action' : 'session_logout', u'username' : session.username }
+        if session.username in self.sessions:
+            del self.sessions[session.username]
+
+        msg = { u'action' : 'lobby_session_logout', u'username' : session.username , u'user_id' : session.user_id }
         self.broadcast({u'session' : 'lobby'} , msg)
 
         session.shutdown()
+
+    def handle_create_room(self, session, message):
+        pass
 
     def add_game(self, name, version, game_builder):
         if name not in self.games:
@@ -47,6 +54,7 @@ class Lobby(broadcastable.Broadcastable):
         for username in self.sessions:
             user_msg = {}
             user_msg[u'username'] = username
+            user_msg[u'user_id'] = self.sessions[username].user_id
             users.append(user_msg)
 
         return users
@@ -66,7 +74,7 @@ class Lobby(broadcastable.Broadcastable):
         session.write(message)
 
         self.add_to_broadcast(session)
-        self.broadcast( { u'session' : 'lobby'} , { u'action' : 'session_logon', u'username' : session.username })
+        self.broadcast( { u'session' : 'lobby'} , { u'action' : 'lobby_session_logon', u'username' : session.username, u'user_id' : session.user_id })
         self.sessions[session.username] = session
 
     def on_session_message(self, session, message):
