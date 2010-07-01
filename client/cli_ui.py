@@ -15,24 +15,38 @@
 #    along with corvogame.  If not, see <http://www.gnu.org/licenses/>.
 
 import ui
+import logging
+import readline
+import threading
 
-class Cli_Ui(ui.Common_Ui):
+class Cli_Ui(ui.Common_Ui, threading.Thread):
     ''' Command-line user interface. '''
 
     def __init__(self):
         ui.Common_Ui.__init__(self)
+        threading.Thread.__init__(self)
+        self.is_alive = True
 
     def user_logon(self, user):
         print '{0} entrou'.format(user)
 
     def user_logout(self, user):
         print '{0} saiu'.format(user)
-        self.showprompt()
 
     def chat_send(self, text):
         if self.conhandler is not None:
             self.conhandler.chat_send(text)
 
-    def showprompt(self):
-        print 'c> '
+    def prompt(self):
+        return 'c> '
+
+    def stop(self):
+        self.is_alive = False
+
+    def run(self):
+        logging.debug("Initializing ui thread")
+
+        while self.is_alive:
+            _in = raw_input(self.prompt())
+            self.chat_send(_in)
 
