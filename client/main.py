@@ -22,13 +22,15 @@ from common import json_handler
 import asyncore
 import logging
 import client_connection
+import config
 
-logging.basicConfig(level=logging.DEBUG, format= '%(asctime)s %(levelname)-8s %(module)-20s[%(lineno)-3d] %(message)s')
+logging.basicConfig(level=logging.INFO, format= '%(asctime)s %(levelname)-8s %(module)-20s[%(lineno)-3d] %(message)s')
 
 if __name__ == "__main__":
     logging.debug("Starting corvogame...")
-    client = client_connection.Client()
 
+    cfg = config.Config()
+    client = client_connection.Client(cfg)
     client.register_message_handler("json", json_handler.Handler())
 
     try:
@@ -40,4 +42,3 @@ if __name__ == "__main__":
         client.shutdown()
         logging.debug("done")
         logging.info("Shutdown complete.")
-

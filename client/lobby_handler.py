@@ -76,4 +76,3 @@ class LobbyHandler(client_handler.ClientHandler):
     def remove_user(self, name):
         if name in self.users:
             del self.users[name]
-

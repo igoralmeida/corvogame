@@ -17,32 +17,23 @@
 from common import client_handler
 from debug import debug
 import lobby_handler
-import config
 import asyncore
 import socket
 import logging
 
 class Client(client_handler.ClientHandler):
     ''' Basic TCP client. '''
-    def __init__(self, ip=None, port=None):
-        client_handler.ClientHandler.__init__(self)
+    def __init__(self, config):
         logging.debug("Initializing Client...")
+        client_handler.ClientHandler.__init__(self)
 
-        self.Cfg = config.Config()
+        self.config = config
+        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+        logging.debug("Connecting to server {0}:{1}".format(self.config.server, self.config.port))
+
+        self.connect((self.config.server,int(self.config.port)))
 
         self.message_handlers = {}
-
-        self.ip = ip
-        if ip is None:
-            self.ip = self.Cfg.server
-
-        self.port = port
-        if port is None:
-            self.port = int(self.Cfg.port) # may come from ConfigParser
-
-        asyncore.dispatcher.__init__(self)
-        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connect((self.ip,self.port))
 
     def register_message_handler(self, protocol, handler):
         ''' Register message handlers. Used to make the client abstract on how
@@ -57,24 +48,26 @@ class Client(client_handler.ClientHandler):
         #TODO implement fallback to some other protocol if not accepted
 
         if (message[u'action'] == u'connection_response' and
-            message[u'result'].startswith('Protocol accepted.')):
+            message[u'accepted'] == u'yes'):
+
             self.read_handler = self.logon_response_handler
             #FIXME what if next msg==action:session_*?
 
-            logon_dict = { u'action' : 'login', u'username' : self.Cfg.username, u'password' : self.Cfg.password }
+            logon_dict = { u'action' : 'login', u'username' : self.config.username, u'password' : self.config.password }
             logon_message = self.message_handler.to_string(logon_dict)
             self.write(logon_message)
 
     #TODO remove from this class
     def logon_response_handler(self, message):
         ''' Check if server acknowledges our authentication '''
+        logging.debug("handling message: {0}".format(message))
 
         if message[u'action'] == u'logon_response':
-            if message[u'result'] == u'connected successfully':
-                logging.info("Successful authentication as {0}".format(self.Cfg.username))
+            if message[u'authenticated'] == u'yes':
+                logging.info("Successful authentication as {0}".format(self.config.username))
                 self.handover_to_lobbyhandler()
             else:
-                #TODO ask for login information again
+                logging.error("Authentication failure for username '{0}' : {1}".format(self.config.username, message[u'result_text']))
                 pass
 
     def handover_to_lobbyhandler(self):
@@ -88,6 +81,6 @@ class Client(client_handler.ClientHandler):
         logging.debug("Client is shutting down...")
 
     def handle_connect(self):
+        logging.debug("Connected sucessfully")
         self.read_handler = self.connection_response_handler
-        self.write(self.Cfg.protocol)
-
+        self.write(self.config.protocol)

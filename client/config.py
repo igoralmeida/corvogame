@@ -102,4 +102,3 @@ if __name__ == '__main__':
     c = Config()
     c.save_diff()
     c.write()
-
