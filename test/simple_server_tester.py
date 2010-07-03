@@ -17,14 +17,15 @@ import logging
 logging.basicConfig(level=logging.INFO, format= '%(asctime)s %(levelname)-8s %(module)-20s[%(lineno)-3d] %(message)s')
 
 class Client(ClientHandler):
-    def __init__(self, socket):        
-        ClientHandler.__init__(self, socket)
-                
+    def __init__(self, ip, port, sock = None):
+        ClientHandler.__init__(self)
+
         self.message_handler = Handler("\r\n")
         self.action_handlers = { "connection_response" : self.handle_connection_response , 'session_logon' : self.handle_session_logon}
         self.read_handler = self.handle_message
 
-        self.send("json\r\n")
+        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.connect((ip , port))
         
     def handle_session_logon(self, message):
         if message['username'] == 'user':
@@ -37,20 +38,18 @@ class Client(ClientHandler):
         ClientHandler.write(self, self.message_handler.to_string(message))
         
     def handle_connect(self):
-        print "connected!"
+        logging.info("Connected!")
         self.send("json\r\n")
-    
+            
     def handle_message(self, message):
         logging.debug("handle_message: {0}".format(message))
         if message['action'] in self.action_handlers:            
             self.action_handlers[message['action']](message)
         else:
             logging.info("Unhandled message: {0}".format(message))
-            
-if __name__ == "__main__":
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((sys.argv[1],5000))
-    cli = Client(sock)
+        
+if __name__ == "__main__":   
+    cli = Client(sys.argv[1], int(sys.argv[2]))
     
     try:
         asyncore.loop(timeout=1.0)

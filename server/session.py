@@ -35,7 +35,7 @@ class Session(ClientHandler):
             logging.debug("Sending to handler {0}".format(self.incoming_message_handler))
             self.incoming_message_handler(self, message)
 
-    def handle_close(self, message):
+    def handle_close(self):
         if self.close_handler:
             self.close_handler(self)
 
