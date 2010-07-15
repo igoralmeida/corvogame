@@ -26,8 +26,13 @@ class ClientHandler(asyncore.dispatcher):
           can be hazardous
     '''
     def __init__(self, conn=None):
-        logging.debug("Initializing ClientHandler")
-        asyncore.dispatcher.__init__(self, conn)
+        logging.debug("Initializing ClientHandler with connection object: [{0}]".format(conn))
+        
+        if conn:
+            asyncore.dispatcher.__init__(self, conn)            
+        else:
+            asyncore.dispatcher.__init__(self)
+            
         self.message_handler = None
         self.read_handler = None
         self.obuffer = []
@@ -43,7 +48,7 @@ class ClientHandler(asyncore.dispatcher):
         self.obuffer.append(None)
 
     def writable(self):
-        return self.obuffer
+        return (not self.connected) or len(self.obuffer)
 
     def handle_read(self):
         ''' reads some data and call the current handler '''
@@ -87,14 +92,19 @@ class ClientHandler(asyncore.dispatcher):
             else:
                 self.inbuffer = self.inbuffer + rest
 
-    def handle_write(self):
+    def handle_write(self):       
+        if not self.obuffer:
+            return        
+            
         logging.debug("Handle write: {0}".format(self.obuffer))
+
         if self.obuffer[0] is None:
             self.close()
             return
 
         sent = self.send(self.obuffer[0])
         logging.debug("Sent {0} bytes".format(sent))
+        
         if sent >= len(self.obuffer[0]):
             self.obuffer.pop(0)
         else:
