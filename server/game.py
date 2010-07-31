@@ -15,10 +15,6 @@
 #    along with corvogame.  If not, see <http://www.gnu.org/licenses/>.
 
 class Game:
-    VERSION = 0.0.0
-    NAME= "NOT_SPECIFIED"
-    MAX_PLAYERS = 6
-
     def start(self):
         pass
 
