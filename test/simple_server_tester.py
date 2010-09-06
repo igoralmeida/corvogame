@@ -22,20 +22,33 @@ class Client(ClientHandler):
         ClientHandler.__init__(self)
 
         self.message_handler = Handler("\r\n")
-        self.action_handlers = { "connection_response" : self.handle_connection_response , 'session_logon' : self.handle_session_logon, 'ping' : self.handle_ping, 'lobby_session_logon' : self.session_logon }
+        self.action_handlers = { "connection_response" : self.handle_connection_response , 
+                                 'session_logon' : self.handle_session_logon, 
+                                 'ping' : self.handle_ping, 
+                                 'lobby_session_logon' : self.session_logon,
+                                 'lobby_info' : self.handle_lobby_info,
+                                 'lobby_create_game' : self.handle_game_create }
+
         self.read_handler = self.handle_message
 
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connect((ip , port))
         
     def session_logon(self, message):
-        pass
-        
+      print "session {0} logged.".format(message['username'])
+    
+    def handle_lobby_info(self, message):
+      print 'received lobby info. Creating game'
+      self.write({ 'action' : 'lobby_create_game', 'game_type' : 'wargame', 'room_name' : 'cocadinha' })
+    
     def handle_ping(self, message):
         if 'time' in message:
             before = float(message['time'])
             print 'response delay:', time.time() - before
-        
+
+    def handle_game_create(self, message):
+      print "Created game with id {0}".format(message['game_id'])
+      
     def handle_session_logon(self, message):
         if message['username'] == 'user':
             self.write({"action" : "lobby_chat" , 'message' : "oi mamae"})
@@ -55,7 +68,7 @@ class Client(ClientHandler):
         if message['action'] in self.action_handlers:            
             self.action_handlers[message['action']](message)
         else:
-            pass#logging.info("Unhandled message: {0}".format(message))
+            logging.info("Unhandled message: {0}".format(message))
         
 if __name__ == "__main__":
     clients = []
