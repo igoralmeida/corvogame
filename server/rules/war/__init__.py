@@ -7,7 +7,7 @@ MAX_PLAYERS = 6
 AUTHOR= 'Victor Vicente de Carvalho'
 VERSION= '0.0.1'
 
-from wargame import Wargame
+from lobby import WargameLobby
 
-def build_game(**kwargs):
-    return Wargame(kwargs)
+def build_lobby(**kwargs):
+  return WargameLobby(**kwargs)
