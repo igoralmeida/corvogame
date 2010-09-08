@@ -1,0 +1,19 @@
+#Informacoes: http://www.mcternan.me.uk/mscgen/index.html
+msc {
+    Session,Lobby;
+
+    --- [ label = "Lobby chat" ];
+    Session->Lobby [ label = "{ 'action' : 'lobby_chat', 'message' : MESSAGE }" ] ;
+    Lobby->Session [ label = "For each session -> { 'action' : 'lobby_chat', 'sender' : USERNAME , 'message' : MESSAGE }" ] ;
+ 
+    --- [ label = "Session disconnect" ];
+    Session->Lobby [ label = "{ 'action' : 'lobby_quit', 'reason' : REASON }" ] ;
+    Lobby->Session [ label = " For each session -> { 'action' : 'lobby_session_logout', 'username' : USERNAME , 'user_id' : USER_ID }" ] ;
+   
+    --- [ label = "Game creation" ];
+    Session->Lobby [ label = "{ 'action' : 'lobby_create_game', 'game_type' : GAME_TYPE , 'room_name' : ROOM_NAME }" ] ;
+    Lobby->Session [ label = " REJECTED -> { 'action' : 'lobby_create_game', 'status' : 'rejected' , 'reason' : REASON }" ] ;
+    
+    Lobby->Session [ label = " ACCEPTED -> { 'action' : 'lobby_create_game', 'status' : 'sucessful' , 'game_id' : GAME_ID }" ] ;
+    Lobby->Session [ label = " For each session -> { 'action' : 'lobby_game_created', 'room_name' : ROOM_NAME , 'username' : USERNAME, 'game_type' : GAME_TYPE }" ] ;
+}
