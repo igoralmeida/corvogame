@@ -21,8 +21,6 @@ class WargameLobby(broadcastable.Broadcastable):
     self.available_colors = ['red','blue','black','green','yellow','white']
     
     self.start()
-    room_owner.write({ 'action' : 'lobby_create_game', 'status' : 'sucessful', 'game_id' : game_id  })
-    
   
   def handle_set_self_ready(self, session, message):
     pass
