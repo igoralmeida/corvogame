@@ -13,6 +13,7 @@ import socket
 import asyncore
 from common.json_handler import Handler
 import logging
+import time
 
 logging.basicConfig(level=logging.INFO, format= '%(asctime)s %(levelname)-8s %(module)-20s[%(lineno)-3d] %(message)s')
 
@@ -21,12 +22,33 @@ class Client(ClientHandler):
         ClientHandler.__init__(self)
 
         self.message_handler = Handler("\r\n")
-        self.action_handlers = { "connection_response" : self.handle_connection_response , 'session_logon' : self.handle_session_logon}
+        self.action_handlers = { "connection_response" : self.handle_connection_response , 
+                                 'session_logon' : self.handle_session_logon, 
+                                 'ping' : self.handle_ping, 
+                                 'lobby_session_logon' : self.session_logon,
+                                 'lobby_info' : self.handle_lobby_info,
+                                 'lobby_create_game' : self.handle_game_create }
+
         self.read_handler = self.handle_message
 
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connect((ip , port))
         
+    def session_logon(self, message):
+      print "session {0} logged.".format(message['username'])
+    
+    def handle_lobby_info(self, message):
+      print 'received lobby info. Creating game'
+      self.write({ 'action' : 'lobby_create_game', 'game_type' : 'wargame', 'room_name' : 'cocadinha' })
+    
+    def handle_ping(self, message):
+        if 'time' in message:
+            before = float(message['time'])
+            print 'response delay:', time.time() - before
+
+    def handle_game_create(self, message):
+      print "Created game with id {0}".format(message['game_id'])
+      
     def handle_session_logon(self, message):
         if message['username'] == 'user':
             self.write({"action" : "lobby_chat" , 'message' : "oi mamae"})
@@ -48,10 +70,18 @@ class Client(ClientHandler):
         else:
             logging.info("Unhandled message: {0}".format(message))
         
-if __name__ == "__main__":   
-    cli = Client(sys.argv[1], int(sys.argv[2]))
+if __name__ == "__main__":
+    clients = []
     
+    if len(sys.argv) < 4:
+        print 'usage:', sys.argv[0], '[host] [port] [instances]'
+        exit(1)
+    
+    for i in xrange(int(sys.argv[3])):
+        clients.append(Client(sys.argv[1], int(sys.argv[2])))
+
     try:
         asyncore.loop(timeout=1.0)
     except KeyboardInterrupt:
-        cli.close()
+        for cli in clients:
+            cli.close()

@@ -78,6 +78,7 @@ class ServerListener(asyncore.dispatcher):
         s = session.Session(unknown_connection)
 
         del self.pending_sessions[address]
+
         if self.logon_handler:
             logging.debug("Calling logon handler")
             self.logon_handler(s)

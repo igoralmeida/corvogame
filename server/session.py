@@ -17,6 +17,8 @@
 from common.client_handler import ClientHandler
 import logging
 import uuid
+import threading
+import time
 
 class Session(ClientHandler):
     def __init__(self, unknown_connection):
@@ -28,6 +30,14 @@ class Session(ClientHandler):
         self.incoming_message_handler = None
         self.user_id = uuid.uuid1().get_hex()
         self.close_handler = None
+        self.session_timer = threading.Timer(2, self.ping)
+        self.session_timer.start()
+
+    def ping(self):
+        #self.write({'action' : 'ping', 'time' : str(time.time()) })
+        self.write({'action' : 'ping' })
+        self.session_timer = threading.Timer(2, self.ping)
+        self.session_timer.start()
 
     def handle_session_messages(self, message):
         logging.debug("Received message {0} from session user {1}".format(message, self.username))
@@ -35,9 +45,20 @@ class Session(ClientHandler):
             logging.debug("Sending to handler {0}".format(self.incoming_message_handler))
             self.incoming_message_handler(self, message)
 
-    def handle_close(self):
+    def shutdown(self):
+        logging.debug("shutdown, close handler is {0}".format(self.close_handler))
+
+        self.session_timer.cancel()
+
         if self.close_handler:
             self.close_handler(self)
+
+        ClientHandler.shutdown(self)
+
+        self.message_handler = None
+        self.read_handler = None
+        self.incoming_message_handler = None
+        self.close_handler = None
 
     def write(self, message):
         logging.debug("Writting message {0} to user {1}".format(message, self.username))

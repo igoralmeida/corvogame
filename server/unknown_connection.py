@@ -81,10 +81,13 @@ class UnknownConnectionHandler(client_handler.ClientHandler):
                 self.username = username
                 logging.debug(self.message_handler.to_string)
                 self.write(self.message_handler.to_string({ u'action' : 'logon_response', u'authenticated' : u'yes' , u'result_text' : u'Connected successfully.' }))
+                self.read_handler = None
                 self.server.promote_to_session(self, self.message_handler, self.addr)
             else:
+                self.server.promote_to_session(self, self.message_handler, self.addr)
                 self.write(self.message_handler.to_string({ u'action' : 'logon_response', u'authenticated' : u'no' , u'result_text' : u'Invalid username or password.' }))
                 self.shutdown()
+
         except KeyError,AssertionError:
             logging.debug("Invalid logon message. Rejecting")
             self.write(self.message_handler.to_string({ u'action' : 'logon_response', u'result' : u"Invalid logon message: {0}".format(readed[0]) }))

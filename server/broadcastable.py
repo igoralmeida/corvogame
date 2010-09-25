@@ -31,7 +31,7 @@ class Broadcastable(threading.Thread):
 
     def remove_from_broadcast(self, item):
         if item in self.to_broadcast:
-            self.to_broadcast.append(item)
+            self.to_broadcast.remove(item)
 
     def stop(self):
         self.is_alive = False

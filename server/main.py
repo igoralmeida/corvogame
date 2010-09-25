@@ -16,7 +16,9 @@
 #    along with corvogame.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+
 sys.path.append('..')
+sys.path.append('rules')
 
 from common import json_handler, websocket_handler
 
@@ -26,8 +28,9 @@ import lobby as l
 import asyncore
 import logging
 import websocket
+import pkgutil
 
-logging.basicConfig(level=logging.DEBUG, format= '%(asctime)s %(levelname)-8s %(module)-20s[%(lineno)-3d] %(message)s')
+logging.basicConfig(level=logging.INFO, format= '%(asctime)s %(levelname)-8s %(module)-20s[%(lineno)-3d] %(message)s')
 
 lobby = l.Lobby()
 
@@ -43,6 +46,11 @@ if __name__ == "__main__":
     server.register_auth_handler(simple_auth.authenticate)
     server.register_message_handler("json", json_handler.Handler() )
     server.register_logon_handler(add_to_lobby)
+
+    game_plugins = [__import__(name, None, None, ['']) for _, name, _ in pkgutil.iter_modules(['rules'])]
+
+    for plugin in game_plugins:
+        lobby.add_game(plugin.NAME, plugin)
 
     try:
         logging.info("Corvogame is running...")
