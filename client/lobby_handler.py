@@ -51,6 +51,9 @@ class LobbyHandler(client_handler.ClientHandler):
                 'logon': self.logon_bcast,
                 'logout': self.logout_bcast,
             }[action](message[u'username'])
+        elif message[u'action'] == u'ping':
+            #TODO would respond with pong, but handler is missing in server
+            pass
 
     def logon_bcast(self, user):
         self.add_user(user)
@@ -59,7 +62,7 @@ class LobbyHandler(client_handler.ClientHandler):
 
     def logout_bcast(self, user):
         self.remove_user(user)
-        self.signal_ui({u'action': 'logosut', u'user': user})
+        self.signal_ui({u'action': 'logout', u'user': user})
         logging.info('User logs out'.format(user))
 
     def lobby_parse(self, message):
@@ -67,22 +70,27 @@ class LobbyHandler(client_handler.ClientHandler):
             newrooms = [r for r in message[u'rooms'] if r not in self.rooms]
             self.rooms.append(newrooms)
             self.update_users(message[u'users'])
+        elif message[u'action'] == u'lobby_session_logon':
+            #FIXME should use logon_bcast(), right?
+            self.signal_ui({u'action': 'logon', u'user': message[u'username']})
+            self.signal_ui({u'action': 'enable_chat'})
 
         self.read_handler = self.common_parse
 
     def chat_send(self, text):
-        # TODO entender a mensagem de chat no lobby
-        message = { u'action': 'chat', u'text': text }
-        pass
+        message = { u'action': 'lobby_chat', u'message': text }
+        self.write(self.message_handler.to_string(message))
 
     def signal_ui(self, message):
         if self.ui is not None:
             if message[u'action'] == u'chat':
                 self.ui.chat_received(message)
             elif message[u'action'] == u'logon':
-                self.ui.user_logon(message[u'user'])
+                self.ui.user_logon_event(message[u'user'])
             elif message[u'action'] == u'logout':
-                self.ui.user_logout(message[u'user'])
+                self.ui.user_logout_event(message[u'user'])
+            elif message[u'action'] == u'enable_chat':
+                self.ui.enable_chat()
 
     def update_users(self, user_dicts):
         for i in user_dicts:

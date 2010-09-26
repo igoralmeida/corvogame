@@ -31,9 +31,21 @@ class Common_Ui():
         # TODO raise exception about this being abstract instead
         raise NotImplementedError
 
-    def user_logon(self, user):
+    def user_logon_event(self, user):
         raise NotImplementedError
 
-    def user_logout(self, user):
+    def user_logout_event(self, user):
+        raise NotImplementedError
+
+    def require_logon(self):
+        """ Tell the UI the client needs logon information """
+        raise NotImplementedError
+
+    def get_logon(self):
+        """ Blocking loop to return both login and password """
+        raise NotImplementedError
+
+    def enable_chat(self):
+        """ Enable chat message prompting in the ui """
         raise NotImplementedError
 
