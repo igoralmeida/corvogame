@@ -81,7 +81,7 @@ class Lobby(broadcastable.Broadcastable):
     def handle_chat(self, session, message):
         logging.debug("Handling chat message")
         if utils.validate_message(message, session, [ 'message' ]):
-        message["sender"] = session.username
+            message["sender"] = session.username
 
         self.broadcast(session, message)
 

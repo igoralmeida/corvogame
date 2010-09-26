@@ -11,18 +11,34 @@ msc {
 	--- [ label = "inicio de uma conexao [1]" ];
 	Client->Server [ label = "handle_accept()" ] ;
 	Server=>UnknownConnectionHandler [ label = "__init__()" ] ;
+
+	|||;
 	
 	--- [ label = "selecao do protocolo [2]" ];
 	Client->UnknownConnectionHandler [ label = "json" ] ;
+	Client<-UnknownConnectionHandler [ label = "{'action':'connection_response', 'result_text':'text', 'accepted':'yes/no'}" ] ;
+
+	|||;
 
 	--- [ label = "autenticacao [3] " ];
-        ...;
+        Client->UnknownConnectionHandler [ label = "{'action':'login', 'username':'user', 'password':'password'}" ];
+        UnknownConnectionHandler->Client [ label = "{'action':'logon_response', 'result_text':'result text', 'authenticated': 'yes/no'}" ];
+
 	|||;
-        Client->UnknownConnectionHandler [ label = "*formato json: {'action':'login','username':'user','password':'password'}" ];
-        UnknownConnectionHandler>>Client [ label = "{'action':'logon_response','result':'result'}" ];
-        |||;
-        Lobby->Client [ label = "*formato json: {'action':'lobby_info','rooms':'rooms','users':'users'}" ];
-        Client->Lobby [ label = "*formato json: {'action':'lobby_chat','sender':'user','message':'message'}" ];
-        --- [ label = "para cada cliente no lobby" ];
-        Lobby->Client [ label = "*formato json: {'action':'lobby_chat','sender':'user','message':'message'}" ];
+
+	--- [ label = "lobby [4] " ];
+	Lobby->Client [ label = "{'action':'lobby_info', 'available_games':'[list of games]', \n 'rooms': '[list of rooms]', 'users':'[list of users]'}" ];
+	|||;
+	Lobby->Client [ label = "{'action':'lobby_session_logon', 'username':'user', 'user_id': 'user hash'}" ];
+
+	...;
+
+	Lobby->Client [ label = "{'action':'ping'} every 2 secs" ];
+	--- [ label = "more messages on lobby.png" ];
+
+	|||;
+
+	--- [ label = "more info: list of games" ];
+	Client abox UnknownConnectionHandler [ label = "{'author':'name', 'player_count':'number', 'name':'name',\n'version': 'versionum', 'description': 'text'}" ];
 }
+

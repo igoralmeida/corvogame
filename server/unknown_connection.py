@@ -84,9 +84,8 @@ class UnknownConnectionHandler(client_handler.ClientHandler):
                 self.read_handler = None
                 self.server.promote_to_session(self, self.message_handler, self.addr)
             else:
-                self.server.promote_to_session(self, self.message_handler, self.addr)
                 self.write(self.message_handler.to_string({ u'action' : 'logon_response', u'authenticated' : u'no' , u'result_text' : u'Invalid username or password.' }))
-                self.shutdown()
+                #TODO shouldn't we terminate the connection after some tries?
 
         except KeyError,AssertionError:
             logging.debug("Invalid logon message. Rejecting")
