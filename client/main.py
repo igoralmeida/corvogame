@@ -23,14 +23,17 @@ import asyncore
 import logging
 import client_connection
 import config
+from cli_ui import Cli_Ui as ui
 
-logging.basicConfig(level=logging.INFO, format= '%(asctime)s %(levelname)-8s %(module)-20s[%(lineno)-3d] %(message)s')
+logging.basicConfig(level=logging.DEBUG, format= '%(asctime)s %(levelname)-8s %(module)-20s[%(lineno)-3d] %(message)s')
 
 if __name__ == "__main__":
-    logging.debug("Starting corvogame...")
+    logging.debug("Starting corvogame...") 
+    interface = ui()
+    interface.start()
 
     cfg = config.Config()
-    client = client_connection.Client(cfg)
+    client = client_connection.Client(config=cfg, ui=interface)
     client.register_message_handler("json", json_handler.Handler())
 
     try:
@@ -41,4 +44,10 @@ if __name__ == "__main__":
         logging.debug("Stopping client")
         client.shutdown()
         logging.debug("done")
+
+        logging.debug("Joining UI")
+        interface.stop()
+        interface.join(.5)
+        logging.debug("done")
         logging.info("Shutdown complete.")
+

@@ -23,17 +23,27 @@ import logging
 
 class Client(client_handler.ClientHandler):
     ''' Basic TCP client. '''
-    def __init__(self, config):
+    def __init__(self, config, ui=None):
         logging.debug("Initializing Client...")
         client_handler.ClientHandler.__init__(self)
 
         self.config = config
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        self.ui = ui
+        if ui is not None:
+            ui.register_connection_handler(self)
+
         logging.debug("Connecting to server {0}:{1}".format(self.config.server, self.config.port))
 
         self.connect((self.config.server,int(self.config.port)))
 
         self.message_handlers = {}
+
+    def signal_ui(self, message):
+        if self.ui is not None:
+            #TODO what to do here?
+            pass
 
     def register_message_handler(self, protocol, handler):
         ''' Register message handlers. Used to make the client abstract on how
@@ -53,9 +63,12 @@ class Client(client_handler.ClientHandler):
             self.read_handler = self.logon_response_handler
             #FIXME what if next msg==action:session_*?
 
-            logon_dict = { u'action' : 'login', u'username' : self.config.username, u'password' : self.config.password }
-            logon_message = self.message_handler.to_string(logon_dict)
-            self.write(logon_message)
+            self.send_logon(self.config.username, self.config.password)
+
+    def send_logon(self, user, passwd):
+        """ Send logon information to server using credentials passed """
+        logon_dict = { u'action' : 'login', u'username' : user, u'password' : passwd }
+        self.write(self.message_handler.to_string(logon_dict))
 
     #TODO remove from this class
     def logon_response_handler(self, message):
@@ -68,14 +81,17 @@ class Client(client_handler.ClientHandler):
                 self.handover_to_lobbyhandler()
             else:
                 logging.error("Authentication failure for username '{0}' : {1}".format(self.config.username, message[u'result_text']))
-                pass
+
+                self.ui.require_logon()
+                l, p = self.ui.get_logon()
+                self.send_logon(l, p)
 
     def handover_to_lobbyhandler(self):
-        lh = lobby_handler.LobbyHandler(self.socket, self.Cfg,
-            self.message_handler)
+        lh = lobby_handler.LobbyHandler(sock=self.socket, cfg=self.config,
+            msg_handler=self.message_handler, ui=self.ui)
         lh.inbuffer = self.inbuffer
 
-        #TODO delete my instance
+        self.shutdown()
 
     def shutdown(self):
         logging.debug("Client is shutting down...")

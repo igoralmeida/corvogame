@@ -30,7 +30,7 @@ import logging
 import websocket
 import pkgutil
 
-logging.basicConfig(level=logging.INFO, format= '%(asctime)s %(levelname)-8s %(module)-20s[%(lineno)-3d] %(message)s')
+logging.basicConfig(level=logging.DEBUG, format= '%(asctime)s %(levelname)-8s %(module)-20s[%(lineno)-3d] %(message)s')
 
 lobby = l.Lobby()
 

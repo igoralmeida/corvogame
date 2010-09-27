@@ -1,0 +1,83 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.7	//
+AuthFactory	auth_factory.py	/^class AuthFactory(object):$/;"	c
+Broadcastable	broadcastable.py	/^class Broadcastable(threading.Thread):$/;"	c
+Game	game.py	/^class Game:$/;"	c
+Lobby	lobby.py	/^class Lobby(broadcastable.Broadcastable):$/;"	c
+RawHandler	unknown_connection.py	/^class RawHandler(object):$/;"	c
+ServerListener	server_listener.py	/^class ServerListener(asyncore.dispatcher):$/;"	c
+Session	session.py	/^class Session(ClientHandler):$/;"	c
+UnknownConnectionHandler	unknown_connection.py	/^class UnknownConnectionHandler(client_handler.ClientHandler):$/;"	c
+Wargame	rules/war/wargame.py	/^class Wargame(broadcastable.Broadcastable):$/;"	c
+WargameLobby	rules/war/lobby.py	/^class WargameLobby(broadcastable.Broadcastable):$/;"	c
+WebsocketListener	websocket.py	/^class WebsocketListener(asyncore.dispatcher):$/;"	c
+__init__	broadcastable.py	/^    def __init__(self):$/;"	m	class:Broadcastable
+__init__	lobby.py	/^    def __init__(self):$/;"	m	class:Lobby
+__init__	rules/war/lobby.py	/^  def __init__(self, main_lobby, room_owner, room_configuration, game_id):$/;"	m	class:WargameLobby
+__init__	rules/war/wargame.py	/^    def __init__(self):$/;"	m	class:Wargame
+__init__	server_listener.py	/^    def __init__(self, ip, port):$/;"	m	class:ServerListener
+__init__	session.py	/^    def __init__(self, unknown_connection):$/;"	m	class:Session
+__init__	unknown_connection.py	/^    def __init__(self, conn, server, addr):$/;"	m	class:UnknownConnectionHandler
+__init__	websocket.py	/^    def __init__(self, ip, port, server):$/;"	m	class:WebsocketListener
+_auth_handler	unknown_connection.py	/^    def _auth_handler(self, message):$/;"	m	class:UnknownConnectionHandler
+_unknown_protocol_message	unknown_connection.py	/^    def _unknown_protocol_message(self, data):$/;"	m	class:UnknownConnectionHandler
+add_game	lobby.py	/^    def add_game(self, name, game_factory):$/;"	m	class:Lobby
+add_player	rules/war/wargame.py	/^      def add_player(player,land):$/;"	f	function:Wargame.sort_lands
+add_session	rules/war/lobby.py	/^  def add_session(self, session, logon_message):$/;"	m	class:WargameLobby
+add_to_broadcast	broadcastable.py	/^    def add_to_broadcast(self, item):$/;"	m	class:Broadcastable
+add_to_lobby	main.py	/^def add_to_lobby(session):$/;"	f
+authenticate	simple_auth.py	/^def authenticate(msg):$/;"	f
+broadcast	broadcastable.py	/^    def broadcast(self, from_item, message):$/;"	m	class:Broadcastable
+build_lobby	rules/war/__init__.py	/^def build_lobby(**kwargs):$/;"	f
+from_string	unknown_connection.py	/^    def from_string(self, raw_string):$/;"	m	class:RawHandler
+get_game_builders	lobby.py	/^    def get_game_builders(self):$/;"	m	class:Lobby
+get_rooms	lobby.py	/^    def get_rooms(self):$/;"	m	class:Lobby
+get_users	lobby.py	/^    def get_users(self):$/;"	m	class:Lobby
+handle_accept	server_listener.py	/^    def handle_accept(self):$/;"	m	class:ServerListener
+handle_accept	websocket.py	/^    def handle_accept(self):$/;"	m	class:WebsocketListener
+handle_chat	lobby.py	/^    def handle_chat(self, session, message):$/;"	m	class:Lobby
+handle_create_game	lobby.py	/^    def handle_create_game(self, session, message):$/;"	m	class:Lobby
+handle_join_game	lobby.py	/^    def handle_join_game(self, session, message):$/;"	m	class:Lobby
+handle_logon	auth_factory.py	/^    def handle_logon(self, message):$/;"	m	class:AuthFactory
+handle_send_lobby_chat	rules/war/lobby.py	/^  def handle_send_lobby_chat(self, session, message):$/;"	m	class:WargameLobby
+handle_session_disconnect	lobby.py	/^    def handle_session_disconnect(self, session):$/;"	m	class:Lobby
+handle_session_disconnect	rules/war/lobby.py	/^  def handle_session_disconnect(self, session):$/;"	m	class:WargameLobby
+handle_session_messages	session.py	/^    def handle_session_messages(self, message):$/;"	m	class:Session
+handle_session_quit	lobby.py	/^    def handle_session_quit(self, session, message):$/;"	m	class:Lobby
+handle_set_self_color	rules/war/lobby.py	/^  def handle_set_self_color(self, session, message):$/;"	m	class:WargameLobby
+handle_set_self_ready	rules/war/lobby.py	/^  def handle_set_self_ready(self, session, message):$/;"	m	class:WargameLobby
+handshake	lobby.py	/^    def handshake(self, session):$/;"	m	class:Lobby
+ine	unknown_connection.py	/^        ''' Starts the handler and define the read method as 'not protocol enabled yet' '''$/;"	f	function:UnknownConnectionHandler.__init__
+ine	unknown_connection.py	/^    We define as unknown connection a client that has not made a initial handshake:$/;"	m	class:UnknownConnectionHandler
+on_session_message	lobby.py	/^    def on_session_message(self, session, message):$/;"	m	class:Lobby
+on_session_message	rules/war/lobby.py	/^  def on_session_message(self, session, message):$/;"	m	class:WargameLobby
+ping	session.py	/^    def ping(self):$/;"	m	class:Session
+promote_to_session	server_listener.py	/^    def promote_to_session(self, unknown_connection, protocol, address):$/;"	m	class:ServerListener
+promote_to_unknown_connection	server_listener.py	/^    def promote_to_unknown_connection(self, conn, addr, handler = None):$/;"	m	class:ServerListener
+register_auth_handler	server_listener.py	/^    def register_auth_handler(self, handler):$/;"	m	class:ServerListener
+register_logon_handler	server_listener.py	/^    def register_logon_handler(self, logon_handler):$/;"	m	class:ServerListener
+register_message_handler	server_listener.py	/^    def register_message_handler(self, protocol, handler):$/;"	m	class:ServerListener
+register_session	game.py	/^    def register_session(self, session):$/;"	m	class:Game
+register_session	rules/war/wargame.py	/^    def register_session(self, session):$/;"	m	class:Wargame
+remove_from_broadcast	broadcastable.py	/^    def remove_from_broadcast(self, item):$/;"	m	class:Broadcastable
+run	broadcastable.py	/^    def run(self):$/;"	m	class:Broadcastable
+send_handshake	rules/war/lobby.py	/^  def send_handshake(self, session):$/;"	m	class:WargameLobby
+send_handshake	rules/war/wargame.py	/^    def send_handshake(self, session):$/;"	m	class:Wargame
+shutdown	server_listener.py	/^    def shutdown(self):$/;"	m	class:ServerListener
+shutdown	session.py	/^    def shutdown(self):$/;"	m	class:Session
+shutdown	websocket.py	/^    def shutdown(self):$/;"	m	class:WebsocketListener
+sort_lands	rules/war/wargame.py	/^    def sort_lands(self, lands, players):$/;"	m	class:Wargame
+start	game.py	/^    def start(self):$/;"	m	class:Game
+start	rules/war/wargame.py	/^    def start(self):$/;"	m	class:Wargame
+stop	broadcastable.py	/^    def stop(self):$/;"	m	class:Broadcastable
+stop	game.py	/^    def stop(self):$/;"	m	class:Game
+stop	lobby.py	/^    def stop(self):$/;"	m	class:Lobby
+stop	rules/war/wargame.py	/^    def stop(self):$/;"	m	class:Wargame
+to_string	unknown_connection.py	/^    def to_string(self,message):$/;"	m	class:RawHandler
+upgrade_protocol_handler	unknown_connection.py	/^    def upgrade_protocol_handler(self, to_handler):$/;"	m	class:UnknownConnectionHandler
+validate_message	utils.py	/^def validate_message(message, session, required_fields):$/;"	f
+write	session.py	/^    def write(self, message):$/;"	m	class:Session
