@@ -39,10 +39,12 @@ class WargameLobby(broadcastable.Broadcastable):
       return
     
     logging.debug("Trying to set color [{0}] to user [{1}]".format(message['color'], session.username))
-        
+    
+    logging.debug("########## self_color: {0}".format('self_color' in session))
+    
     if 'self_color' in session:
       logging.debug("User already have a color defined, removing it and trying to define the new color")
-      self.colors.append(session['self_color'])
+      self.available_colors.append(session['self_color'])
       session['self_color'] = message['color']
     elif message['color'] not in self.COLORS:
       logging.debug("User provided an invalid color")
@@ -51,8 +53,9 @@ class WargameLobby(broadcastable.Broadcastable):
     else:
       logging.debug("Setting color [{0}] to user. Available colors: {1}".format(message['color'], self.available_colors))
       session['self_color'] = message['color']
-      self.available_colors = self.available_colors.remove(message['color'])
+      self.available_colors.remove(message['color'])
     
+    logging.debug("########## self_color: {0}".format(session['self_color']))
     self.broadcast( { 'session' : 'game_lobby' }, { 'action' : 'lobby_player_updated_color', 'color' : message['color'] })
     
   def handle_send_lobby_chat(self, session, message):
