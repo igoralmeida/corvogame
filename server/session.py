@@ -42,6 +42,9 @@ class Session(ClientHandler):
           return self.data_holder[key]
         raise StopIteration
         
+    def __contains__(self, item):
+        return item in self.data_holder
+        
     def ping(self):
         #self.write({'action' : 'ping', 'time' : str(time.time()) })
         self.write({'action' : 'ping' })
