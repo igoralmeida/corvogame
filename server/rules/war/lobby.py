@@ -27,8 +27,13 @@ class WargameLobby(broadcastable.Broadcastable):
     self.start()
   
   def handle_set_self_ready(self, session, message):
-    pass
-    
+    if utils.validate(message, session, ['ready']) \
+      and utils.validate_field_values(message, session, 'ready', message['ready'], ['true','false']):
+      
+      session['ready'] = message['ready'] == 'true'
+      
+      self.broadcast({ 'session' : 'game_lobby' }, { 'action' : 'game_lobby_player_ready_state', 'ready' : message['ready'] } )
+      
   def send_handshake(self, session):
     session.write( { 'action': 'lobby_game_capabilities' , 
                      'capabilities' : self.capabilities,
@@ -40,23 +45,24 @@ class WargameLobby(broadcastable.Broadcastable):
     
     logging.debug("Trying to set color [{0}] to user [{1}]".format(message['color'], session.username))
     
-    logging.debug("########## self_color: {0}".format('self_color' in session))
-    
-    if 'self_color' in session:
-      logging.debug("User already have a color defined, removing it and trying to define the new color")
+
+    if message['color'] not in self.available_colors:
+      logging.debug("User provided an invalid or taken color")
+      session.write({'action' : 'lobby_set_self_color', 'status' : 'error', 'reason' : 'invalid or already taken color {0}'.format(message['color'])})
+      return
+    elif 'self_color' in session:
+      logging.debug("User already have a color [{0}] defined, removing it and trying to define the new color".format(session['self_color']))
       self.available_colors.append(session['self_color'])
       session['self_color'] = message['color']
-    elif message['color'] not in self.COLORS:
-      logging.debug("User provided an invalid color")
-      session.send({'action' : 'lobby_set_self_color', 'status' : 'error', 'reason' : 'invalid color {0}'.format(message['color'])})
-      return
+      self.available_colors.remove(message['color'])
     else:
       logging.debug("Setting color [{0}] to user. Available colors: {1}".format(message['color'], self.available_colors))
       session['self_color'] = message['color']
       self.available_colors.remove(message['color'])
     
     logging.debug("########## self_color: {0}".format(session['self_color']))
-    self.broadcast( { 'session' : 'game_lobby' }, { 'action' : 'lobby_player_updated_color', 'color' : message['color'] })
+    self.broadcast( { 'session' : 'game_lobby' }, { 'action' : 'lobby_player_updated_color', 'user' : session.username,  'color' : message['color'] })
+    self.broadcast( { 'session' : 'game_lobby' }, { 'action' : 'lobby_available_colors', 'colors' : self.available_colors })
     
   def handle_send_lobby_chat(self, session, message):
     logging.debug("Handling chat message")
@@ -85,6 +91,7 @@ class WargameLobby(broadcastable.Broadcastable):
 
     session.incoming_message_handler = self.on_session_message
     session.close_handler = self.handle_session_disconnect
+    session['self_color'] = self.available_colors.pop()
     
     self.lobby_sessions.append(session)
     self.send_handshake(session)
