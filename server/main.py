@@ -14,9 +14,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with corvogame.  If not, see <http://www.gnu.org/licenses/>.
-
 import sys
-
 sys.path.append('..')
 sys.path.append('rules')
 

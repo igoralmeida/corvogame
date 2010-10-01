@@ -1,13 +1,12 @@
 import sys
-sys.path.append('../..')
 sys.path.append('..')
+sys.path.append('rules')
 
-import lobby
+import war.wargame_lobby as lobby
 import uuid
 import logging
 import time
-
-logging.basicConfig(level=logging.DEBUG, format= '%(asctime)s %(levelname)-8s %(module)-20s[%(lineno)-3d] %(message)s')
+import py
 
 class MockSession (object):
   def __init__(self, username):
@@ -48,7 +47,7 @@ class MockSession (object):
 class MockLobby(object):
   pass
 
-def setting_color():
+def test_setting_color():
   room_owner = MockSession('room_owner')
   l = lobby.WargameLobby(MockLobby(),room_owner, {'room_name' : 'cocada' }, uuid.uuid1().get_hex())
   
@@ -67,7 +66,7 @@ def setting_color():
   l.join()
 
 
-def setting_same_color():
+def test_setting_same_color():
   room_owner = MockSession('room_owner')
   l = lobby.WargameLobby(MockLobby(),room_owner, {'room_name' : 'cocada' }, uuid.uuid1().get_hex())
   
@@ -91,7 +90,7 @@ def setting_same_color():
   l.stop()
   l.join()
 
-def setting_color_users():
+def test_setting_color_users():
   room_owner = MockSession('room_owner')
   l = lobby.WargameLobby(MockLobby(),room_owner, {'room_name' : 'cocada' }, uuid.uuid1().get_hex())
   
@@ -105,16 +104,18 @@ def setting_color_users():
   assert(session2['self_color'] not in l.available_colors)
   
   l.handle_set_self_color(session1, { 'action' : 'lobby_set_self_color', 'color' : 'red'} )
+  print session2.expect('lobby_player_updated_color')
   assert(session2.expect('lobby_player_updated_color')['username'] == session1.username)
   
   l.handle_set_self_color(session2, { 'action' : 'lobby_set_self_color', 'color' : 'blue'} )
+  print session1.expect('lobby_player_updated_color')
   assert(session1.expect('lobby_player_updated_color')['username'] == session2.username)
   
   l.stop()
   l.join()
 
-def change_color():
-  room_owner = MockSession('room_owner')
+def test_change_color():
+  room_owner = MockSession('room_owner')  
   l = lobby.WargameLobby(MockLobby(),room_owner, {'room_name' : 'cocada' }, uuid.uuid1().get_hex())
   
   session1 = MockSession('user1')
@@ -130,9 +131,29 @@ def change_color():
   
   l.stop()
   l.join()
+
+def test_ready_game():
+  room_owner = MockSession('room_owner')  
+  l = lobby.WargameLobby(MockLobby(),room_owner, {'room_name' : 'cocada' }, uuid.uuid1().get_hex())
+
+  session1 = MockSession('user1')
+  session2 = MockSession('user2')
+  session3 = MockSession('user3')
+  session4 = MockSession('user4')
   
-if __name__ == "__main__":
-  tests = [ setting_color, change_color, setting_same_color ]
-  for test in tests:
-    test()
+  l.add_session(session1, {})
+  l.add_session(session2, {})
+  l.add_session(session3, {})
+  l.add_session(session4, {})
   
+  l.handle_set_self_ready(session1, { 'ready' : 'true' } )
+  l.handle_set_self_ready(session2, { 'ready' : 'true' } )
+  l.handle_set_self_ready(session3, { 'ready' : 'true' } )
+  
+  session1.expect('game_lobby_player_ready_state')
+  session2.expect('game_lobby_player_ready_state')
+  session3.expect('game_lobby_player_ready_state')
+  
+  l.stop()
+  l.join()
+

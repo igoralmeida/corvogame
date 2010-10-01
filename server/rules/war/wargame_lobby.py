@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import broadcastable
-import war
+from common import broadcastable
 import logging
 import utils
 import copy
+import war
 
 class WargameLobby(broadcastable.Broadcastable):
   COLORS = ['red','blue','black','green','yellow','white']
@@ -27,13 +27,14 @@ class WargameLobby(broadcastable.Broadcastable):
     self.start()
   
   def handle_set_self_ready(self, session, message):
-    if utils.validate(message, session, ['ready']) \
+    if utils.validate_message(message, session, ['ready']) \
       and utils.validate_field_values(message, session, 'ready', message['ready'], ['true','false']):
       
       session['ready'] = message['ready'] == 'true'
       
-      self.broadcast({ 'session' : 'game_lobby' }, { 'action' : 'game_lobby_player_ready_state', 'ready' : message['ready'] } )
-      
+      self.broadcast({ 'session' : 'game_lobby' }, { 'action' : 'game_lobby_player_ready_state', \
+                                                     'ready' : message['ready'], 'username' : session.username } )
+
   def send_handshake(self, session):
     session.write( { 'action': 'lobby_game_capabilities' , 
                      'capabilities' : self.capabilities,
@@ -60,8 +61,7 @@ class WargameLobby(broadcastable.Broadcastable):
       session['self_color'] = message['color']
       self.available_colors.remove(message['color'])
     
-    logging.debug("########## self_color: {0}".format(session['self_color']))
-    self.broadcast( { 'session' : 'game_lobby' }, { 'action' : 'lobby_player_updated_color', 'user' : session.username,  'color' : message['color'] })
+    self.broadcast( { 'session' : 'game_lobby' }, { 'action' : 'lobby_player_updated_color', 'username' : session.username,  'color' : message['color'] })
     self.broadcast( { 'session' : 'game_lobby' }, { 'action' : 'lobby_available_colors', 'colors' : self.available_colors })
     
   def handle_send_lobby_chat(self, session, message):
