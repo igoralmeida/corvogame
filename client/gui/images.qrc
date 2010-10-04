@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="maps">
+    <file>niquel.jpg</file>
+  </qresource>
+</RCC>

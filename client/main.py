@@ -18,12 +18,16 @@
 import sys
 sys.path.append('..')
 
-from common import json_handler
+
 import asyncore
+import threading
 import logging
+
+from common import json_handler
 import client_connection
 import config
-from cli_ui import Cli_Ui as ui
+from gui_ui import PyQt4Graphical_Ui as ui
+#from cli_ui import Cli_Ui as ui
 
 logging.basicConfig(level=logging.DEBUG, format= '%(asctime)s %(levelname)-8s %(module)-20s[%(lineno)-3d] %(message)s')
 
@@ -31,6 +35,7 @@ if __name__ == "__main__":
     logging.debug("Starting corvogame...") 
     interface = ui()
     interface.start()
+    asyncore_thread = threading.Thread(target=asyncore.loop)
 
     cfg = config.Config()
     client = client_connection.Client(config=cfg, ui=interface)
@@ -38,11 +43,15 @@ if __name__ == "__main__":
 
     try:
         logging.info("Corvogame is running...")
-        asyncore.loop(timeout=1.0)
+        asyncore_thread.start()
+        interface.blocking_loop()
     except KeyboardInterrupt:
+        pass
+    finally:
         logging.info("Closing corvogame client")
         logging.debug("Stopping client")
         client.shutdown()
+        asyncore_thread.join(.5)
         logging.debug("done")
 
         logging.debug("Joining UI")

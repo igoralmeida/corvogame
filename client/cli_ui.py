@@ -38,6 +38,10 @@ class Cli_Ui(ui.Common_Ui, threading.Thread, cmd.Cmd):
 
         self.logon_info = None
 
+    def blocking_loop(self):
+        while self.is_alive:
+            pass
+
     def user_logon_event(self, user):
         print '{0} entrou'.format(user)
 
@@ -120,5 +124,7 @@ class Cli_Ui(ui.Common_Ui, threading.Thread, cmd.Cmd):
 
     def do_quit(self, s):
         """ Terminar a GUI e sair """
-        self.stop() #FIXME doesn't work
+        self.state = NOPROMPT
+        self.stop()
+        return True
 
