@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'clientmain.ui'
 #
-# Created: Sun Oct  3 22:57:57 2010
+# Created: Sat Oct  9 16:06:53 2010
 #      by: PyQt4 UI code generator 4.7
 #
 # WARNING! All changes made in this file will be lost!
@@ -13,9 +13,6 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1057, 561)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/maps/niquel.jpg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        MainWindow.setWindowIcon(icon)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayoutWidget = QtGui.QWidget(self.centralwidget)
@@ -119,8 +116,8 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.chatTabWidget.setCurrentIndex(1)
-        self.playersTabWidget.setCurrentIndex(2)
+        self.chatTabWidget.setCurrentIndex(0)
+        self.playersTabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
