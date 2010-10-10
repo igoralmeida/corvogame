@@ -17,6 +17,8 @@
 from common import client_handler
 from debug import debug
 import config
+import ui_messages
+
 import asyncore
 import logging
 
@@ -44,25 +46,28 @@ class LobbyHandler(client_handler.ClientHandler):
         self.users = {} #{'name':{username:'name',...}, 'name2':...}
 
     def common_parse(self, message):
-        if message[u'action'].startswith('session_'):
-            action = message[u'action'][8:] #remove 'session_' from string
+        if message[u'action'].startswith('lobby_'):
+            action = message[u'action'][6:] #remove 'lobby_' from string
 
             {
-                'logon': self.logon_bcast,
-                'logout': self.logout_bcast,
-            }[action](message[u'username'])
+                'session_logon': self.logon_bcast,
+                'session_logout': self.logout_bcast,
+                'chat': self.chat_received,
+            }[action](message)
         elif message[u'action'] == u'ping':
             #TODO would respond with pong, but handler is missing in server
             pass
 
-    def logon_bcast(self, user):
+    def logon_bcast(self, message):
+        user = message[u'username']
         self.add_user(user)
-        self.signal_ui({u'action': 'logon', u'user': user})
+        self.signal_ui(ui_messages.logon(user))
         logging.info('User {0} logs in'.format(user))
 
-    def logout_bcast(self, user):
+    def logout_bcast(self, message):
+        user = message[u'username']
         self.remove_user(user)
-        self.signal_ui({u'action': 'logout', u'user': user})
+        self.signal_ui(ui_messages.logout(user))
         logging.info('User logs out'.format(user))
 
     def lobby_parse(self, message):
@@ -72,10 +77,16 @@ class LobbyHandler(client_handler.ClientHandler):
             self.update_users(message[u'users'])
         elif message[u'action'] == u'lobby_session_logon':
             #FIXME should use logon_bcast(), right?
-            self.signal_ui({u'action': 'logon', u'user': message[u'username']})
-            self.signal_ui({u'action': 'enable_chat'})
+            self.signal_ui(ui_messages.logon(message[u'username']))
+            self.signal_ui(ui_messages.enable_chat())
 
         self.read_handler = self.common_parse
+
+    def chat_received(self, message):
+        sender = message[u'sender']
+        text = message[u'message']
+
+        self.signal_ui(ui_messages.chat_received(sender, text))
 
     def chat_send(self, text):
         message = { u'action': 'lobby_chat', u'message': text }

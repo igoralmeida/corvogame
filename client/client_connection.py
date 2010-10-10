@@ -17,6 +17,8 @@
 from common import client_handler
 from debug import debug
 import lobby_handler
+import ui_messages
+
 import asyncore
 import socket
 import logging
@@ -36,14 +38,19 @@ class Client(client_handler.ClientHandler):
 
         logging.debug("Connecting to server {0}:{1}".format(self.config.server, self.config.port))
 
+        self.signal_ui(ui_messages.connection('init'))
         self.connect((self.config.server,int(self.config.port)))
 
         self.message_handlers = {}
 
     def signal_ui(self, message):
+        ''' Signal the UI something important has happened.
+        The messages are the dictionaries in ui_messages.py
+        See LobbyHandler for more examples.
+        '''
         if self.ui is not None:
-            #TODO what to do here?
-            pass
+            if message[u'action'] == u'connection':
+                self.ui.statusBar_info(message)
 
     def register_message_handler(self, protocol, handler):
         ''' Register message handlers. Used to make the client abstract on how
@@ -102,5 +109,8 @@ class Client(client_handler.ClientHandler):
 
     def handle_connect(self):
         logging.debug("Connected sucessfully")
+
+        self.signal_ui(ui_messages.connection('established'))
+
         self.read_handler = self.connection_response_handler
         self.write(self.config.protocol)
