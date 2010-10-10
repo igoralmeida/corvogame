@@ -30,14 +30,24 @@ class Session(ClientHandler):
         self.incoming_message_handler = None
         self.user_id = uuid.uuid1().get_hex()
         self.close_handler = None
-        self.session_timer = threading.Timer(2, self.ping)
-        self.session_timer.start()
+        self.data_holder = {}
 
+    def __setitem__(self, key, value):
+        print 'setitem {0} {1}'.format(key,value)
+        self.data_holder[key] = value
+    
+    def __getitem__(self, key):
+        print 'getitem {0}'.format(key)
+        if key in self.data_holder:
+          return self.data_holder[key]
+        raise StopIteration
+        
+    def __contains__(self, item):
+        return item in self.data_holder
+        
     def ping(self):
         #self.write({'action' : 'ping', 'time' : str(time.time()) })
         self.write({'action' : 'ping' })
-        self.session_timer = threading.Timer(2, self.ping)
-        self.session_timer.start()
 
     def handle_session_messages(self, message):
         logging.debug("Received message {0} from session user {1}".format(message, self.username))
@@ -47,8 +57,6 @@ class Session(ClientHandler):
 
     def shutdown(self):
         logging.debug("shutdown, close handler is {0}".format(self.close_handler))
-
-        self.session_timer.cancel()
 
         if self.close_handler:
             self.close_handler(self)

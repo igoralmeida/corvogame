@@ -8,3 +8,9 @@ def validate_message(message, session, required_fields):
     session.write({ 'action' : 'message_reject' , 'error' : 'missing required fields: ' + ' '.join(req) })
     return False
   return True
+
+def validate_field_values(message, session, field, value, values):
+  if not value in values:
+    session.write({ 'action' : 'message_reject' , 'error' : 'invalid value [{0}] for field [{1}]'.format(value, field) } )
+    return False
+  return True
