@@ -109,7 +109,7 @@ class PyQt4Graphical_Ui(ui.Common_Ui, threading.Thread):
     def generalChat_show(self, str):
         self.gui_CorvoGUI.geralChatTabTextBrowser.insertPlainText(str)
 
-    def statusBar_info(self, ui_msg):
+    def status_info(self, ui_msg):
         ''' This method centralizes the statusBar handling for the messages in
         ui_messages.py.
         '''

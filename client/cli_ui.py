@@ -42,6 +42,19 @@ class Cli_Ui(ui.Common_Ui, threading.Thread, cmd.Cmd):
         while self.is_alive:
             pass
 
+    def status_info(self, message):
+        if message[u'action'] == u'connection':
+            status = message[u'status']
+
+            if status == u'init':
+                str = 'Conectando...'
+            elif status == u'established':
+                str = 'Conectado!'
+            elif status == u'off':
+                str = 'Desconectado'
+
+            print str
+
     def user_logon_event(self, user):
         print '{0} entrou'.format(user)
 
@@ -76,6 +89,9 @@ class Cli_Ui(ui.Common_Ui, threading.Thread, cmd.Cmd):
         l, p = self.logon_info
         self.logon_info = None
         return l, p
+
+    def chat_received(self, message):
+        print '<{0}> {1}\n'.format(message[u'sender'], message[u'message'])
 
     def chat_send(self, text):
         if self.conhandler is not None:

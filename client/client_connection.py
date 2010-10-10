@@ -50,7 +50,7 @@ class Client(client_handler.ClientHandler):
         '''
         if self.ui is not None:
             if message[u'action'] == u'connection':
-                self.ui.statusBar_info(message)
+                self.ui.status_info(message)
 
     def register_message_handler(self, protocol, handler):
         ''' Register message handlers. Used to make the client abstract on how
