@@ -15,13 +15,21 @@
 #    along with corvogame.  If not, see <http://www.gnu.org/licenses/>.
 
 class Common_Ui():
-    ''' Command-line user interface. '''
+    ''' Abstract user interface. '''
 
     def __init__(self):
         self.conhandler = None
 
     def register_connection_handler(self, handler):
         self.conhandler = handler
+
+    def blocking_loop(self):
+        """ Override this to maintain a blocking loop """
+        raise NotImplementedError
+
+    def stop(self):
+        # TODO raise exception about this being abstract instead
+        raise NotImplementedError
 
     def chat_send(self, text):
         # TODO raise exception about this being abstract instead

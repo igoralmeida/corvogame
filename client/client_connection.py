@@ -87,14 +87,18 @@ class Client(client_handler.ClientHandler):
                 self.send_logon(l, p)
 
     def handover_to_lobbyhandler(self):
-        lh = lobby_handler.LobbyHandler(sock=self.socket, cfg=self.config,
+        self.lh = lobby_handler.LobbyHandler(sock=self.socket, cfg=self.config,
             msg_handler=self.message_handler, ui=self.ui)
-        lh.inbuffer = self.inbuffer
-
-        self.shutdown()
+        self.lh.inbuffer = self.inbuffer
 
     def shutdown(self):
+        # FIXME if we were called too soon, there was no time to instantiate
+        # LobbyHandler in handover_to_lobbyhandler and this will trigger an
+        # exception.
+
         logging.debug("Client is shutting down...")
+        self.lh.shutdown()
+        logging.debug("done")
 
     def handle_connect(self):
         logging.debug("Connected sucessfully")
