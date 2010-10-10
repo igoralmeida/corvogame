@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'clientmain.ui'
 #
-# Created: Sat Oct  9 16:06:53 2010
-#      by: PyQt4 UI code generator 4.7
+# Created: Sun Oct 10 13:01:39 2010
+#      by: PyQt4 UI code generator 4.7.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -15,6 +15,11 @@ class Ui_MainWindow(object):
         MainWindow.resize(1057, 561)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+        self.graphicsView = QtGui.QGraphicsView(self.centralwidget)
+        self.graphicsView.setGeometry(QtCore.QRect(0, 0, 1051, 511))
+        self.graphicsView.setProperty("cursor", QtCore.Qt.ArrowCursor)
+        self.graphicsView.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+        self.graphicsView.setObjectName("graphicsView")
         self.horizontalLayoutWidget = QtGui.QWidget(self.centralwidget)
         self.horizontalLayoutWidget.setGeometry(QtCore.QRect(0, 300, 1051, 211))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
@@ -95,11 +100,6 @@ class Ui_MainWindow(object):
         self.bloqueadosPlayersTabVerticalLayout.addWidget(self.bloqueadosPlayersTabListWidget)
         self.playersTabWidget.addTab(self.bloqueadosPlayersTab, "")
         self.hudHorizontalLayout.addWidget(self.playersTabWidget)
-        self.graphicsView = QtGui.QGraphicsView(self.centralwidget)
-        self.graphicsView.setGeometry(QtCore.QRect(0, 0, 1051, 511))
-        self.graphicsView.setProperty("cursor", QtCore.Qt.ArrowCursor)
-        self.graphicsView.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
-        self.graphicsView.setObjectName("graphicsView")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1057, 21))
