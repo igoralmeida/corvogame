@@ -32,6 +32,9 @@ class PyQt4Graphical_Ui(ui.Common_Ui, threading.Thread):
         self.gui_MainWindow = QtGui.QMainWindow()
         self.gui_CorvoGUI = guiPyQt4.Ui_MainWindow()
         self.gui_CorvoGUI.setupUi(self.gui_MainWindow)
+
+        QtCore.QObject.connect(self.gui_CorvoGUI.geralChatTabLineEdit, QtCore.SIGNAL("returnPressed()"),
+            self.ui_chat_send)
         self.gui_MainWindow.show()
 
         self.is_alive = True
@@ -51,6 +54,10 @@ class PyQt4Graphical_Ui(ui.Common_Ui, threading.Thread):
     def stop(self):
         self.is_alive = False
         self.gui_app.exit()
+
+    def ui_chat_send(self):
+        self.chat_send(self.gui_CorvoGUI.geralChatTabLineEdit.text().__str__())
+        self.gui_CorvoGUI.geralChatTabLineEdit.clear()
 
     def chat_send(self, text):
         if self.conhandler is not None:
