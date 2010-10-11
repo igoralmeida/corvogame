@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import broadcastable
+from common import broadcastable
 import uuid
 import utils
 
