@@ -26,6 +26,7 @@ class PyQt4Graphical_Ui(ui.Common_Ui, threading.Thread, QtCore.QObject):
 
     signal_show_geralChat = QtCore.pyqtSignal(str) #show in the TextBrowser
     signal_clear_geralChatLineEdit = QtCore.pyqtSignal() #clear the LineEdit
+    signal_show_statusBar = QtCore.pyqtSignal(str) #show in the StatusBar
 
     def __init__(self):
         ui.Common_Ui.__init__(self)
@@ -40,6 +41,7 @@ class PyQt4Graphical_Ui(ui.Common_Ui, threading.Thread, QtCore.QObject):
         #connect signals
         self.signal_show_geralChat.connect(self.generalChat_show)
         self.signal_clear_geralChatLineEdit.connect(self.generalChatLine_clear)
+        self.signal_show_statusBar.connect(self.statusBar_show)
 
         QtCore.QObject.connect(self.gui_CorvoGUI.geralChatTabLineEdit, QtCore.SIGNAL("returnPressed()"),
             self.ui_chat_send)
@@ -139,7 +141,7 @@ class PyQt4Graphical_Ui(ui.Common_Ui, threading.Thread, QtCore.QObject):
             elif status == u'off':
                 msg = 'Desconectado'
 
-            self.statusBar_show(msg)
+            self.signal_show_statusBar.emit(msg)
 
     def statusBar_show(self, msg):
         self.gui_CorvoGUI.statusbar.showMessage(msg)
