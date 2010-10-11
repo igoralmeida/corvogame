@@ -32,6 +32,9 @@ class PyQt4Graphical_Ui(ui.Common_Ui, threading.Thread):
         self.gui_MainWindow = QtGui.QMainWindow()
         self.gui_CorvoGUI = guiPyQt4.Ui_MainWindow()
         self.gui_CorvoGUI.setupUi(self.gui_MainWindow)
+
+        QtCore.QObject.connect(self.gui_CorvoGUI.geralChatTabLineEdit, QtCore.SIGNAL("returnPressed()"),
+            self.ui_chat_send)
         self.gui_MainWindow.show()
 
         self.is_alive = True
@@ -39,6 +42,10 @@ class PyQt4Graphical_Ui(ui.Common_Ui, threading.Thread):
         self.logon_info = None
 
     def run(self):
+        ''' Dummy and useless run() method for threading.Thread.
+        This is obsolete because PyQt requires the gui to run on the main event
+        thread.
+        '''
         logging.debug("Initializing ui thread")
 
     def blocking_loop(self):
@@ -48,15 +55,26 @@ class PyQt4Graphical_Ui(ui.Common_Ui, threading.Thread):
         self.is_alive = False
         self.gui_app.exit()
 
+    def ui_chat_send(self):
+        self.chat_send(self.gui_CorvoGUI.geralChatTabLineEdit.text().__str__())
+        self.gui_CorvoGUI.geralChatTabLineEdit.clear()
+
     def chat_send(self, text):
         if self.conhandler is not None:
             self.conhandler.chat_send(text)
 
+    def chat_received(self, message):
+        #FIXME is it a private or a public chat?
+        self.generalChat_show('<{0}> {1}\n'.format(message[u'sender'],
+            message[u'message']))
+
     def user_logon_event(self, user):
-        print '{0} entrou'.format(user)
+        ''' Show in the gui someone has logged in '''
+        self.generalChat_show('{0} entrou\n'.format(user))
 
     def user_logout_event(self, user):
-        print '{0} saiu'.format(user)
+        ''' Show in the gui someone has logged out '''
+        self.generalChat_show('{0} saiu\n'.format(user))
 
     def require_logon(self):
         self.store_logon('user 123456')
@@ -81,4 +99,33 @@ class PyQt4Graphical_Ui(ui.Common_Ui, threading.Thread):
         login, pwd = parts[0], parts[1]
         self.enable_chat()
         self.logon_info = [login, pwd]
+
+    #-----------------
+    # PyQt gui helper functions
+    #
+    # The CamelCase in the first words are only there to differentiate the event
+    # from the GUI element.
+    #-----------------
+    def generalChat_show(self, str):
+        self.gui_CorvoGUI.geralChatTabTextBrowser.insertPlainText(str)
+
+    def status_info(self, ui_msg):
+        ''' This method centralizes the statusBar handling for the messages in
+        ui_messages.py.
+        '''
+
+        if ui_msg[u'action'] == u'connection':
+            status = ui_msg[u'status']
+
+            if status == u'init':
+                str = 'Conectando...'
+            elif status == u'established':
+                str = 'Conectado!'
+            elif status == u'off':
+                str = 'Desconectado'
+
+            self.statusBar_show(str)
+
+    def statusBar_show(self, str):
+        self.gui_CorvoGUI.statusbar.showMessage(str)
 

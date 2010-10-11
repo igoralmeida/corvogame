@@ -57,3 +57,7 @@ class Common_Ui():
         """ Enable chat message prompting in the ui """
         raise NotImplementedError
 
+    def status_info(self, message):
+        """ Connection status information. See ui_messages.py """
+        raise NotImplementedError
+

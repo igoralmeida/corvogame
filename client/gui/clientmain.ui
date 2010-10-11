@@ -13,11 +13,23 @@
   <property name="windowTitle">
    <string>Corvogame</string>
   </property>
-  <property name="windowIcon">
-   <iconset resource="images.qrc">
-    <normaloff>:/maps/niquel.jpg</normaloff>:/maps/niquel.jpg</iconset>
-  </property>
   <widget class="QWidget" name="centralwidget">
+   <widget class="QGraphicsView" name="graphicsView">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>1051</width>
+      <height>511</height>
+     </rect>
+    </property>
+    <property name="cursor" stdset="0">
+     <cursorShape>ArrowCursor</cursorShape>
+    </property>
+    <property name="dragMode">
+     <enum>QGraphicsView::ScrollHandDrag</enum>
+    </property>
+   </widget>
    <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
@@ -40,7 +52,7 @@
         <enum>QTabWidget::Rounded</enum>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <property name="usesScrollButtons">
         <bool>false</bool>
@@ -115,7 +127,7 @@
      <item>
       <widget class="QTabWidget" name="playersTabWidget">
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="jogadoresPlayersTab">
         <attribute name="title">
@@ -184,28 +196,6 @@
     <zorder>chatTabWidget</zorder>
     <zorder>playersTabWidget</zorder>
    </widget>
-   <widget class="QGraphicsView" name="graphicsView">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>1051</width>
-      <height>511</height>
-     </rect>
-    </property>
-    <property name="cursor" stdset="0">
-     <cursorShape>ArrowCursor</cursorShape>
-    </property>
-    <property name="dragMode">
-     <enum>QGraphicsView::ScrollHandDrag</enum>
-    </property>
-   </widget>
-   <zorder>graphicsView</zorder>
-   <zorder>gridLayoutWidget</zorder>
-   <zorder>horizontalLayoutWidget</zorder>
-   <zorder>pushButton</zorder>
-   <zorder>toolButton</zorder>
-   <zorder>radioButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -229,11 +219,7 @@
    <addaction name="menuFile"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar">
-   <property name="statusTip">
-    <string/>
-   </property>
-  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources>
   <include location="images.qrc"/>

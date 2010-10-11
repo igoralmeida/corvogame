@@ -35,7 +35,8 @@ if __name__ == "__main__":
     logging.debug("Starting corvogame...") 
     interface = ui()
     interface.start()
-    asyncore_thread = threading.Thread(target=asyncore.loop)
+    asyncore_thread = threading.Thread(target=asyncore.loop,
+        kwargs={'timeout': 0.5})
 
     cfg = config.Config()
     client = client_connection.Client(config=cfg, ui=interface)
