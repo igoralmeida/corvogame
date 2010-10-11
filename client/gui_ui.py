@@ -21,20 +21,29 @@ from PyQt4 import QtCore, QtGui
 import ui
 from gui import guiPyQt4
 
-class PyQt4Graphical_Ui(ui.Common_Ui, threading.Thread):
+class PyQt4Graphical_Ui(ui.Common_Ui, threading.Thread, QtCore.QObject):
     ''' Graphical user interface using the PyQt4 framework. '''
+
+    signal_show_geralChat = QtCore.pyqtSignal(str) #show in the TextBrowser
+    signal_clear_geralChatLineEdit = QtCore.pyqtSignal() #clear the LineEdit
 
     def __init__(self):
         ui.Common_Ui.__init__(self)
         threading.Thread.__init__(self)
+        QtCore.QObject.__init__(self)
 
         self.gui_app = QtGui.QApplication([])
         self.gui_MainWindow = QtGui.QMainWindow()
         self.gui_CorvoGUI = guiPyQt4.Ui_MainWindow()
         self.gui_CorvoGUI.setupUi(self.gui_MainWindow)
 
+        #connect signals
+        self.signal_show_geralChat.connect(self.generalChat_show)
+        self.signal_clear_geralChatLineEdit.connect(self.generalChatLine_clear)
+
         QtCore.QObject.connect(self.gui_CorvoGUI.geralChatTabLineEdit, QtCore.SIGNAL("returnPressed()"),
             self.ui_chat_send)
+
         self.gui_MainWindow.show()
 
         self.is_alive = True
@@ -56,8 +65,11 @@ class PyQt4Graphical_Ui(ui.Common_Ui, threading.Thread):
         self.gui_app.exit()
 
     def ui_chat_send(self):
+        #FIXME this is still being sent by the GUI thread, not the
+        #client_handler thread.
+
         self.chat_send(self.gui_CorvoGUI.geralChatTabLineEdit.text().__str__())
-        self.gui_CorvoGUI.geralChatTabLineEdit.clear()
+        self.signal_clear_geralChatLineEdit.emit()
 
     def chat_send(self, text):
         if self.conhandler is not None:
@@ -65,16 +77,16 @@ class PyQt4Graphical_Ui(ui.Common_Ui, threading.Thread):
 
     def chat_received(self, message):
         #FIXME is it a private or a public chat?
-        self.generalChat_show('<{0}> {1}\n'.format(message[u'sender'],
+        self.signal_show_geralChat.emit('<{0}> {1}\n'.format(message[u'sender'],
             message[u'message']))
 
     def user_logon_event(self, user):
         ''' Show in the gui someone has logged in '''
-        self.generalChat_show('{0} entrou\n'.format(user))
+        self.signal_show_geralChat.emit('{0} entrou\n'.format(user))
 
     def user_logout_event(self, user):
         ''' Show in the gui someone has logged out '''
-        self.generalChat_show('{0} saiu\n'.format(user))
+        self.signal_show_geralChat.emit('{0} saiu\n'.format(user))
 
     def require_logon(self):
         self.store_logon('user 123456')
@@ -106,8 +118,11 @@ class PyQt4Graphical_Ui(ui.Common_Ui, threading.Thread):
     # The CamelCase in the first words are only there to differentiate the event
     # from the GUI element.
     #-----------------
-    def generalChat_show(self, str):
-        self.gui_CorvoGUI.geralChatTabTextBrowser.insertPlainText(str)
+    def generalChat_show(self, msg):
+        self.gui_CorvoGUI.geralChatTabTextBrowser.insertPlainText(msg)
+
+    def generalChatLine_clear(self):
+        self.gui_CorvoGUI.geralChatTabLineEdit.clear()
 
     def status_info(self, ui_msg):
         ''' This method centralizes the statusBar handling for the messages in
@@ -118,14 +133,14 @@ class PyQt4Graphical_Ui(ui.Common_Ui, threading.Thread):
             status = ui_msg[u'status']
 
             if status == u'init':
-                str = 'Conectando...'
+                msg = 'Conectando...'
             elif status == u'established':
-                str = 'Conectado!'
+                msg = 'Conectado!'
             elif status == u'off':
-                str = 'Desconectado'
+                msg = 'Desconectado'
 
-            self.statusBar_show(str)
+            self.statusBar_show(msg)
 
-    def statusBar_show(self, str):
-        self.gui_CorvoGUI.statusbar.showMessage(str)
+    def statusBar_show(self, msg):
+        self.gui_CorvoGUI.statusbar.showMessage(msg)
 
