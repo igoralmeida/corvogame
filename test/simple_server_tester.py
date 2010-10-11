@@ -54,7 +54,7 @@ class Client(ClientHandler):
                 
     def print_menu(self):
       def respawn():
-        threading.Timer(1, self.print_menu).start()
+        threading.Timer(0.01, self.print_menu).start()
       
       if self.showing_menu:
         return
@@ -134,7 +134,7 @@ class Client(ClientHandler):
             print "Unhandled message: {0}".format(message)
         
         if not self.showing_menu:
-          threading.Timer(1, self.print_menu).start()
+          threading.Timer(0.01, self.print_menu).start()
         
 if __name__ == "__main__":
     clients = []
@@ -147,7 +147,7 @@ if __name__ == "__main__":
         clients.append(Client(sys.argv[1], int(sys.argv[2])))
 
     try:
-        asyncore.loop(timeout=1.0)
+        asyncore.loop(timeout=0.001)
     except KeyboardInterrupt:
         for cli in clients:
             cli.close()

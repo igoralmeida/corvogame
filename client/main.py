@@ -26,8 +26,8 @@ import logging
 from common import json_handler
 import client_connection
 import config
-from gui_ui import PyQt4Graphical_Ui as ui
-#from cli_ui import Cli_Ui as ui
+#from gui_ui import PyQt4Graphical_Ui as ui
+from cli_ui import Cli_Ui as ui
 
 logging.basicConfig(level=logging.DEBUG, format= '%(asctime)s %(levelname)-8s %(module)-20s[%(lineno)-3d] %(message)s')
 

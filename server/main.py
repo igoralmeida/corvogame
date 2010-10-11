@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
     try:
         logging.info("Corvogame is running...")
-        asyncore.loop(timeout=1.0)
+        asyncore.loop(timeout=0.001)
     except KeyboardInterrupt:
         logging.info("Closing corvogame server")
         logging.debug("Stopping lobby")
