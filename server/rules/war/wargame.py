@@ -13,11 +13,16 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with corvogame.  If not, see <http://www.gnu.org/licenses/>.
-import broadcastable
+from common import broadcastable
 import random
 import logging
+from threading import Timer
+import logging
+import utils
 
 class Wargame(broadcastable.Broadcastable):
+    TURN_TIMER = 30
+    
     LANDS = [
       'Alaska' ,
       'Mackenzie' ,
@@ -128,40 +133,164 @@ class Wargame(broadcastable.Broadcastable):
       'Conquest 24 territories at your choice.',  
       'Conquest in totallity Europe, South America and one more continent at your choice.'
     ]
+    
+    #Defeat the Red army
+    def check_objective_0(self, player):
+        pass
+        
+    #Defeat the White army
+    def check_objective_1(self, player):
+        pass
+    
+    #Defeat the Blue army
+    def check_objective_2(self, player):
+        pass
+    
+    #Defeat the Black Army
+    def check_objective_3(self, player):
+        pass    
+
+    #Defeat the Green army        
+    def check_objective_4(self, player):
+        pass
+
+    #Defeat the Yellow army
+    def check_objective_5(self, player):
+        pass
+    
+    def check_objective_6(self, player):
+        pass
+        
+    def check_objective_7(self, player):
+        pass
+
+    def check_objective_8(self, player):
+        pass
+        
+    def check_objective_9(self, player):
+        pass
+        
+    def check_objective_10(self, player):
+        pass
+        
+    def check_objective_11(self, player):
+        pass
+        
+    def check_objective_12(self, player):
+        pass
+        
+    def check_objective_13(self, player):
+        pass
 
     def __init__(self):
-      self.playing_sessions = []
+        self.playing_sessions = []
+        self.handlers = { 'wargame_add_piece' : self.handle_wargame_add_piece,
+                          'wargame_remove_piece' : self.handle_wargame_remove_piece, 
+                          'wargame_attack_land' :  self.handle_wargame_attack_land,
+                          'wargame_chat': self.handle_wargame_chat  }
+        
+        self.turn_deadline_timer = None
+        self.turn_total_time = 0
+    
+    def handle_wargame_chat(self, session, message):
+        logging.debug("Handling chat message")
+        if utils.validate_message(message, session, [ 'message' ]):
+          message["sender"] = session.username
+          self.broadcast(session, message)
+    
+    def handle_wargame_add_piece(self, session, message):
+        pass
+    
+    def handle_wargame_remove_piece(self, session, message):
+        pass
+     
+    def handle_wargame_attack_land(self, session, message):
+        pass
     
     #/brief: sort lands and players, and calculate lands that are over the minimum
     def sort_lands(self, lands, players):
-      minimum_lands = len(lands) / len(players)
-      sorted_lands = random.sample(lands, len(lands))
+        minimum_lands = len(lands) / len(players)
+        sorted_lands = random.sample(lands, len(lands))
+
+        #sorting sampled lands between players
+        i = 0
+        for player in players:
+            player['lands'] = sorted_lands[i : i + minimum_lands]
+            i += minimum_lands
+            
+        sorted_players = random.sample(players, len(players))
+
+        #add remaining lands to a sorted player list
+        for player, land in zip(sorted_players, sorted_lands[i:]):    
+            player['lands'].append(land)
+            player['over_landed'] = True
       
-      #sorting sampled lands between players
-      i = 0
-      for player in players:
-        player['lands'] = sorted_lands[i : i + minimum_lands]
-        i += minimum_lands
-      
-      sorted_players = random.sample(players, len(players))
-      
-      #add remaining lands to a sorted player list
-      def add_player(player,land):
-        player['lands'].append(land)
-        player['over_landed'] = True
+    def sort_objectives(self, objectives, players):
+        sorted_objectives = random.sample(objectives, len(players))
         
-      map(add_player, sorted_players, sorted_lands[i:])
-      
-    def start(self):
-      self.sort_lands(self.LANDS, self.playing_sessions)
-      self.sort_objectives()
+        for player, objective in zip(players, sorted_objectives):
+            player['objective'] = objective
+            player['objective_checker'] = getattr(self, 'check_objective_{0}'.format(self.OBJECTIVES.index(objective)))
     
+    def sort_player_order(self, players):
+        players = random.sample(players, len(players))
+        
+    def start(self):
+        self.sort_lands(self.LANDS, self.playing_sessions)
+        self.sort_objectives(self.OBJECTIVES, self.playing_sessions)
+        self.sort_player_order(self.playing_sessions)
+
+        self.active_player = -1        
+        self.notify_turn_change()
+
+        self.player_deadline_timer = threading.Timer(1, self.handle_turn_timer_update)
+        
+    def handle_session_disconnect(self, session):
+        logging.debug("Handling session disconnect for session {0}".format(session.username))
+
+        self.remove_from_broadcast(session)
+
+        if session.username in self.sessions:
+            del self.sessions[session.username]
+
+        #TODO: What to do here? end the game?
+        
+        msg = { u'action' : 'wargame_session_logout', u'username' : session.username , u'user_id' : session.user_id }
+        self.broadcast({u'session' : 'lobby'} , msg)
+            
+    def notify_turn_change(self):
+        self.active_player += 1
+        
+        self.broadcast(None, { 'action' : 'wargame_status_update_turn', 
+                               'player' : self.playing_sessions[self.active_player % len(self.playing_sessions)].username } )
+    
+    def handle_turn_timer_update(self):
+        if self.turn_total_time >= self.TURN_TIMER:
+            self.notify_turn_change()
+            return
+
+        self.player_deadline_timer = threading.Timer(1, self.handle_turn_timer_update)
+        self.turn_total_time += 1
+        
+        self.playing_sessions[self.active_player % len(self.playing_sessions)].write({'action' : 'wargame_turn_tick',
+                                                                                      'time' : self.turn_total_time,
+                                                                                      'remaining' : self.TURN_TIMER - self.turn_total_time })
+        
     def stop(self):
-      broadcastable.Broadcastable.stop(self)
+        broadcastable.Broadcastable.stop(self)
     
     def send_handshake(self, session):
-      session.send({'action' : 'game_handshake', 'message' : 'welcome to wargame!'})
+        session.write({'action' : 'game_handshake', 'message' : 'welcome to wargame!'})
     
     def register_session(self, session):
-      self.playing_sessions.append(session)
-      self.send_handshake(session)
+        session.incoming_message_handler = self.on_session_message
+        session.close_handler = self.handle_session_disconnect
+
+        self.playing_sessions.append(session)
+        self.send_handshake(session)
+      
+    def on_session_message(self, session, message):
+        logging.debug("Received message {0} from user {1}".format(message, session.username))
+        if message["action"] in self.handlers:
+            self.handlers[message["action"]](session, message)    
+      
