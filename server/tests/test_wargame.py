@@ -40,7 +40,6 @@ def test_sorted_objectives():
         
     map ( asserter , sessions )
 
-
 def test_simple_game():
     random.seed(10)
         

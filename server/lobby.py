@@ -3,7 +3,6 @@
 import logging
 from common import broadcastable
 import uuid
-import utils
 
 class Lobby(broadcastable.Broadcastable):
     def __init__(self):
@@ -28,7 +27,10 @@ class Lobby(broadcastable.Broadcastable):
 
     def handle_join_game(self, session, message):
         if 'id' in message['room_id'] and message['room_id'] in self.games:
-          self.games.add_session(session)          
+          session.remove_validators(self.validations)
+          
+          self.games.add_session(session)
+          self.remove_from_broadcast(session)        
 
     def handle_create_game(self, session, message):
       if not message['game_type'] in self.game_builders:
@@ -47,8 +49,11 @@ class Lobby(broadcastable.Broadcastable):
       self.games[game_id]  = game_lobby
       
       logging.info("Created sucessfully")
+      
       game_lobby.add_session(session, None)
+      
       self.remove_from_broadcast(session)
+      session.remove_validators(self.validations)
       
       del self.sessions[session.username]
       

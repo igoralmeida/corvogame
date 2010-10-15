@@ -36,7 +36,8 @@ class WargameLobby(broadcastable.Broadcastable):
                               'game_lobby_start_game' : self.handle_start_game }
     
     self.validations = {  'game_lobby_set_self_ready' : [ 'ready' ],
-                          'game_lobby_set_self_color' : [ 'color' ]  }
+                          'game_lobby_set_self_color' : [ 'color' ],
+                          'game_lobby_chat' : [ 'message' ]  }
     
     self.capabilities = [ 'can_set_self_color', 'can_start_game', 'can_set_self_ready' ]   
     self.available_colors = copy.copy(self.COLORS)
@@ -49,8 +50,6 @@ class WargameLobby(broadcastable.Broadcastable):
       return
 
     not_ready = [ x for x in self.game_lobby_sessions if 'ready' not in x or x['ready'] == False ]
-    
-    print "not_ready is:" , not_ready
     
     if not_ready:
       session.write( { 'action' : 'game_lobby_start_game', 'status' : 'error', 'reason' : 'there are players not ready to play' } )
