@@ -31,6 +31,14 @@ class Session(ClientHandler):
         self.user_id = uuid.uuid1().get_hex()
         self.close_handler = None
         self.data_holder = {}
+        self.message_validators =  {}
+        
+    def inject_validators(self, actions):
+        self.message_validators.update(actions)
+        
+    def remove_validators(self, actions):
+        for action in actions:
+            del self.message_validators[action]
 
     def __setitem__(self, key, value):
         print 'setitem {0} {1}'.format(key,value)
@@ -51,6 +59,17 @@ class Session(ClientHandler):
 
     def handle_session_messages(self, message):
         logging.debug("Received message {0} from session user {1}".format(message, self.username))
+        
+        if not 'action' in message:
+            self.write({'action' : 'message_reject', 'reason' : 'missing "action" tag'})
+            return
+            
+        if message['action'] in self.message_validators:
+            not_present = [ field for field in self.message_validators[message['action']] if not field in message ]
+            if not_present:
+                self.write({'action' : 'message_reject', 'action' : message['action'],  'reason' : 'missing required fields: {0}'.format(not_present) })             
+                return
+                
         if self.incoming_message_handler:
             logging.debug("Sending to handler {0}".format(self.incoming_message_handler))
             self.incoming_message_handler(self, message)

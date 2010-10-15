@@ -5,7 +5,13 @@ class MockSession (object):
     self.received_messages = {}
     self.username = username
     self.data_holder = {}
-    
+  
+  def inject_validators(self, action):
+    pass
+  
+  def remove_validators(self, actions):
+    pass
+  
   def __setitem__(self, key, value):
     #print 'setitem {0} {1}'.format(key, value)
     self.data_holder[key] = value

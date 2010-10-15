@@ -19,6 +19,11 @@ class Lobby(broadcastable.Broadcastable):
                            'lobby_quit' : self.handle_session_quit,
                            'lobby_join_game' : self.handle_join_game,
                            'lobby_create_game' : self.handle_create_game }
+
+        self.validations = { 'lobby_chat' : ['message'],
+                             'lobby_quit' : ['reason'],
+                             'lobby_join_game' : ['room_id'],
+                             'lobby_create_game' : ['game_type','room_name'] }
         self.start()
 
     def handle_join_game(self, session, message):
@@ -26,34 +31,33 @@ class Lobby(broadcastable.Broadcastable):
           self.games.add_session(session)          
 
     def handle_create_game(self, session, message):
-        if utils.validate_message(message, session, [ 'game_type', 'room_name' ]):
-          if not message['game_type'] in self.game_builders:
-            session.write({ 'action' : message['action'], 'status' : 'reject', 'reason' : 'invalid game type : ' + message['game_type'] })
-            return
-          
-          if not len(message['room_name']) > 3:
-            session.write({ 'action' : message['action'], 'status' : 'reject', 'reason' : 'room name too small' })
-            return
-            
-          game_id = uuid.uuid1().get_hex()
-          
-          logging.info("Session {0} is trying to create a game of type {1} and room name of {2}".format(session.username , message['game_type'], message['room_name']))
-          game_lobby = self.game_builders[message['game_type']].build_lobby(main_lobby=self, room_owner=session, room_configuration= message, game_id=game_id)
-          
-          self.games[game_id]  = game_lobby
-          
-          logging.info("Created sucessfully")
-          game_lobby.add_session(session, None)
-          self.remove_from_broadcast(session)
-          
-          del self.sessions[session.username]
-          
-          
-          session.write({ 'action' : 'lobby_create_game', 'status' : 'sucessfull', 'game_id' : game_id  })
-          self.broadcast({ u'session' : 'lobby' }, { 'action' : 'lobby_game_created', 
-                                                     'room_name' : message['room_name'], 
-                                                     'username': session.username, 
-                                                     'game_type' : message['game_type'] })
+      if not message['game_type'] in self.game_builders:
+        session.write({ 'action' : message['action'], 'status' : 'reject', 'reason' : 'invalid game type : ' + message['game_type'] })
+        return
+      
+      if not len(message['room_name']) > 3:
+        session.write({ 'action' : message['action'], 'status' : 'reject', 'reason' : 'room name too small' })
+        return
+        
+      game_id = uuid.uuid1().get_hex()
+      
+      logging.info("Session {0} is trying to create a game of type {1} and room name of {2}".format(session.username , message['game_type'], message['room_name']))
+      game_lobby = self.game_builders[message['game_type']].build_lobby(main_lobby=self, room_owner=session, room_configuration= message, game_id=game_id)
+      
+      self.games[game_id]  = game_lobby
+      
+      logging.info("Created sucessfully")
+      game_lobby.add_session(session, None)
+      self.remove_from_broadcast(session)
+      
+      del self.sessions[session.username]
+      
+      
+      session.write({ 'action' : 'lobby_create_game', 'status' : 'sucessfull', 'game_id' : game_id  })
+      self.broadcast({ u'session' : 'lobby' }, { 'action' : 'lobby_game_created', 
+                                                 'room_name' : message['room_name'], 
+                                                 'username': session.username, 
+                                                 'game_type' : message['game_type'] })
           
     def handle_session_disconnect(self, session):
         logging.debug("Handling session disconnect")
@@ -84,9 +88,8 @@ class Lobby(broadcastable.Broadcastable):
 
     def handle_chat(self, session, message):
         logging.debug("Handling chat message")
-        if utils.validate_message(message, session, [ 'message' ]):
-          message["sender"] = session.username
-          self.broadcast(session, message)
+        message["sender"] = session.username
+        self.broadcast(session, message)
 
     def get_rooms(self):
         logging.debug("Getting rooms")
@@ -128,6 +131,9 @@ class Lobby(broadcastable.Broadcastable):
 
     def handshake(self, session):
         logging.debug("Doing handshake for username {0}".format(session.username))
+
+        session.inject_validators(self.validations)
+        
         session.incoming_message_handler = self.on_session_message
         session.close_handler = self.handle_session_disconnect
 

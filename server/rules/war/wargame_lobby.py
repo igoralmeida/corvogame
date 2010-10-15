@@ -15,7 +15,6 @@
 #    along with corvogame.  If not, see <http://www.gnu.org/licenses/>.
 from common import broadcastable
 import logging
-import utils
 import copy
 import war
 
@@ -36,6 +35,9 @@ class WargameLobby(broadcastable.Broadcastable):
                               'game_lobby_set_self_ready' : self.handle_set_self_ready,
                               'game_lobby_start_game' : self.handle_start_game }
     
+    self.validations = {  'game_lobby_set_self_ready' : [ 'ready' ],
+                          'game_lobby_set_self_color' : [ 'color' ]  }
+    
     self.capabilities = [ 'can_set_self_color', 'can_start_game', 'can_set_self_ready' ]   
     self.available_colors = copy.copy(self.COLORS)
     
@@ -55,12 +57,9 @@ class WargameLobby(broadcastable.Broadcastable):
       return
   
   def handle_set_self_ready(self, session, message):
-    if utils.validate_message(message, session, ['ready']) \
-      and utils.validate_field_values(message, session, 'ready', message['ready'], ['true','false']):
+    session['ready'] = message['ready'] == 'true'
       
-      session['ready'] = message['ready'] == 'true'
-      
-      self.broadcast({ 'session' : 'game_lobby' }, { 'action' : 'game_lobby_player_ready_state', \
+    self.broadcast({ 'session' : 'game_lobby' }, { 'action' : 'game_lobby_player_ready_state', \
                                                      'ready' : message['ready'], 'username' : session.username } )
 
   def send_handshake(self, session):
@@ -68,10 +67,7 @@ class WargameLobby(broadcastable.Broadcastable):
                      'capabilities' : self.capabilities,
                      'available_colors' : self.available_colors })
     
-  def handle_set_self_color(self, session, message):
-    if not utils.validate_message(message, session, [ 'color' ]):
-      return
-    
+  def handle_set_self_color(self, session, message):    
     logging.debug("Trying to set color [{0}] to user [{1}]".format(message['color'], session.username))
     
 

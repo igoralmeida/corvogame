@@ -18,7 +18,6 @@ import random
 import logging
 from threading import Timer
 import logging
-import utils
 
 class Wargame(broadcastable.Broadcastable):
     TURN_TIMER = 30
@@ -188,15 +187,19 @@ class Wargame(broadcastable.Broadcastable):
                           'wargame_remove_piece' : self.handle_wargame_remove_piece, 
                           'wargame_attack_land' :  self.handle_wargame_attack_land,
                           'wargame_chat': self.handle_wargame_chat  }
-        
+
+        self.validations = { 'wargame_add_piece'   : [ 'to',  'quantity'],
+                                    'wargame_remove_piece': [ 'from','quantity'],
+                                    'wargame_attack_land' : [ 'to' , 'from' , 'quantity' ],
+                                    'wargame_chat'        : [ 'message' ] }
+                                    
         self.turn_deadline_timer = None
         self.turn_total_time = 0
     
     def handle_wargame_chat(self, session, message):
         logging.debug("Handling chat message")
-        if utils.validate_message(message, session, [ 'message' ]):
-          message["sender"] = session.username
-          self.broadcast(session, message)
+        message["sender"] = session.username
+        self.broadcast(session, message)
     
     def handle_wargame_add_piece(self, session, message):
         pass
@@ -285,7 +288,9 @@ class Wargame(broadcastable.Broadcastable):
     def register_session(self, session):
         session.incoming_message_handler = self.on_session_message
         session.close_handler = self.handle_session_disconnect
-
+        
+        session.inject_validators(self.validations)
+        
         self.playing_sessions.append(session)
         self.send_handshake(session)
       
