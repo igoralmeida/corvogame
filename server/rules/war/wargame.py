@@ -182,6 +182,8 @@ class Wargame(broadcastable.Broadcastable):
         pass
 
     def __init__(self):
+        broadcastable.Broadcastable.__init__(self)
+        
         self.playing_sessions = []
         self.handlers = { 'wargame_add_piece' : self.handle_wargame_add_piece,
                           'wargame_remove_piece' : self.handle_wargame_remove_piece, 
@@ -195,20 +197,48 @@ class Wargame(broadcastable.Broadcastable):
                                     
         self.turn_deadline_timer = None
         self.turn_total_time = 0
+        
+        self.start()
     
     def handle_wargame_chat(self, session, message):
         logging.debug("Handling chat message")
         message["sender"] = session.username
         self.broadcast(session, message)
     
+    def validate_is_player_turn(self, session):
+        if not self.playing_sessions[self.active_player] == session:
+            session.write({'action' : 'wargame_forbidden_action', 'reason' : 'not your turn' })
+            return False
+        
+        return True 
+    
     def handle_wargame_add_piece(self, session, message):
-        pass
+        if not self.validate_is_player_turn(session):
+            return
+        
+        to_land = message['to']
+        
+        if from_land not in session['land_data']:
+            session.write({ 'action' : message['action'] , 'status' : 'reject', 'reason' : 'not land owner' })
+            return
     
     def handle_wargame_remove_piece(self, session, message):
         pass
      
     def handle_wargame_attack_land(self, session, message):
-        pass
+        if not self.validate_is_player_turn(session):
+            return
+    
+        from_land = message['from']
+        to_land = message['to']
+        
+        if from_land not in session['land_data']:
+            session.write({ 'action' : message['action'] , 'status' : 'reject', 'reason' : 'not land owner' })
+            return
+        
+        if to_land in session['land_data']:
+            session.write({ 'action' : message['action'] , 'status' : 'reject', 'reason' : 'trying to atack a land owned by you' })
+            return        
     
     #/brief: sort lands and players, and calculate lands that are over the minimum
     def sort_lands(self, lands, players):
@@ -218,14 +248,19 @@ class Wargame(broadcastable.Broadcastable):
         #sorting sampled lands between players
         i = 0
         for player in players:
-            player['lands'] = sorted_lands[i : i + minimum_lands]
+            player['land_data'] = {}
+            
+            def assign_land(land): 
+                player['land_data'][land] = { 'count' : 0 }
+                
+            map(lambda land: assign_land(land), sorted_lands[i : i + minimum_lands])
             i += minimum_lands
             
         sorted_players = random.sample(players, len(players))
 
         #add remaining lands to a sorted player list
         for player, land in zip(sorted_players, sorted_lands[i:]):    
-            player['lands'].append(land)
+            player['land_data'][land] = { 'count' : 0 }
             player['over_landed'] = True
       
     def sort_objectives(self, objectives, players):
@@ -238,15 +273,27 @@ class Wargame(broadcastable.Broadcastable):
     def sort_player_order(self, players):
         players = random.sample(players, len(players))
         
-    def start(self):
+    
+    def set_player_data(self, players):
+        for player in players:
+            player['remaining_pieces'] = len(player['land_data'])
+    
+    def start_game(self):
         self.sort_lands(self.LANDS, self.playing_sessions)
         self.sort_objectives(self.OBJECTIVES, self.playing_sessions)
         self.sort_player_order(self.playing_sessions)
-
+        self.set_player_data(self.playing_sessions)
+        
+        for player in self.playing_sessions:
+            self.send_handshake(player)
+            player.write({ 'action' : 'wargame_startup_info' , 
+                           'owned_land_data' : player['land_data'], 
+                           'objective' : player['objective'] })
+        
         self.active_player = -1        
         self.notify_turn_change()
 
-        self.player_deadline_timer = threading.Timer(1, self.handle_turn_timer_update)
+        self.player_deadline_timer = Timer(1, self.handle_turn_timer_update)
         
     def handle_session_disconnect(self, session):
         logging.debug("Handling session disconnect for session {0}".format(session.username))
@@ -263,7 +310,6 @@ class Wargame(broadcastable.Broadcastable):
             
     def notify_turn_change(self):
         self.active_player += 1
-        
         self.broadcast(None, { 'action' : 'wargame_status_update_turn', 
                                'player' : self.playing_sessions[self.active_player % len(self.playing_sessions)].username } )
     
@@ -272,28 +318,29 @@ class Wargame(broadcastable.Broadcastable):
             self.notify_turn_change()
             return
 
-        self.player_deadline_timer = threading.Timer(1, self.handle_turn_timer_update)
+        self.player_deadline_timer = Timer(1, self.handle_turn_timer_update)
         self.turn_total_time += 1
         
         self.playing_sessions[self.active_player % len(self.playing_sessions)].write({'action' : 'wargame_turn_tick',
                                                                                       'time' : self.turn_total_time,
                                                                                       'remaining' : self.TURN_TIMER - self.turn_total_time })
-        
+
     def stop(self):
         broadcastable.Broadcastable.stop(self)
     
     def send_handshake(self, session):
-        session.write({'action' : 'game_handshake', 'message' : 'welcome to wargame!'})
+        session.write({'action' : 'wargame_handshake', 'message' : 'welcome to wargame!'})
     
     def register_session(self, session):
+        logging.debug('registering session {0}'.format(session))
+       
         session.incoming_message_handler = self.on_session_message
         session.close_handler = self.handle_session_disconnect
         
         session.inject_validators(self.validations)
         
         self.playing_sessions.append(session)
-        self.send_handshake(session)
-      
+     
     def on_session_message(self, session, message):
         logging.debug("Received message {0} from user {1}".format(message, session.username))
         if message["action"] in self.handlers:

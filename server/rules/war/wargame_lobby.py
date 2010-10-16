@@ -54,6 +54,19 @@ class WargameLobby(broadcastable.Broadcastable):
     if not_ready:
       session.write( { 'action' : 'game_lobby_start_game', 'status' : 'error', 'reason' : 'there are players not ready to play' } )
       return
+    
+    not_colored = [ x for x in self.game_lobby_sessions if not 'self_color' in x]
+    
+    if not_colored:
+      session.write( { 'action' : 'game_lobby_start_game', 'status' : 'error', 'reason' : 'there are players not have a color defined' } )
+      return
+    
+    game = war.wargame.Wargame()
+    
+    for session in self.game_lobby_sessions:
+        game.register_session(session)
+    
+    game.start_game()
   
   def handle_set_self_ready(self, session, message):
     session['ready'] = message['ready'] == 'true'
