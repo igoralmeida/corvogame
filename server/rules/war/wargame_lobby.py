@@ -30,14 +30,14 @@ class WargameLobby(broadcastable.Broadcastable):
     self.room_owner = room_owner
     self.room_name = room_configuration['room_name']
     self.game_id = game_id
-    self.message_handlers = { 'game_lobby_chat' : self.handle_send_lobby_chat,
-                              'game_lobby_set_self_color' : self.handle_set_self_color, 
-                              'game_lobby_set_self_ready' : self.handle_set_self_ready,
-                              'game_lobby_start_game' : self.handle_start_game }
+    self.message_handlers = { 'wargame_lobby_chat' : self.handle_send_lobby_chat,
+                              'wargame_lobby_set_self_color' : self.handle_set_self_color, 
+                              'wargame_lobby_set_self_ready' : self.handle_set_self_ready,
+                              'wargame_lobby_start_game' : self.handle_start_game }
     
-    self.validations = {  'game_lobby_set_self_ready' : [ 'ready' ],
-                          'game_lobby_set_self_color' : [ 'color' ],
-                          'game_lobby_chat' : [ 'message' ]  }
+    self.validations = {  'wargame_lobby_set_self_ready' : [ 'ready' ],
+                          'wargame_lobby_set_self_color' : [ 'color' ],
+                          'wargame_lobby_chat' : [ 'message' ]  }
     
     self.capabilities = [ 'can_set_self_color', 'can_start_game', 'can_set_self_ready' ]   
     self.available_colors = copy.copy(self.COLORS)
@@ -46,19 +46,19 @@ class WargameLobby(broadcastable.Broadcastable):
   
   def handle_start_game(self, session, message):
     if session is not self.room_owner:
-      session.write({ 'action' : 'game_lobby_start_game', 'status' : 'error', 'reason' :  'you are not the room owner' })
+      session.write({ 'action' : 'wargame_lobby_start_game', 'status' : 'error', 'reason' :  'you are not the room owner' })
       return
 
     not_ready = [ x for x in self.game_lobby_sessions if 'ready' not in x or x['ready'] == False ]
     
     if not_ready:
-      session.write( { 'action' : 'game_lobby_start_game', 'status' : 'error', 'reason' : 'there are players not ready to play' } )
+      session.write( { 'action' : 'wargame_lobby_start_game', 'status' : 'error', 'reason' : 'there are players not ready to play' } )
       return
     
     not_colored = [ x for x in self.game_lobby_sessions if not 'self_color' in x]
     
     if not_colored:
-      session.write( { 'action' : 'game_lobby_start_game', 'status' : 'error', 'reason' : 'there are players not have a color defined' } )
+      session.write( { 'action' : 'wargame_lobby_start_game', 'status' : 'error', 'reason' : 'there are players not have a color defined' } )
       return
     
     game = war.wargame.Wargame()
@@ -71,11 +71,11 @@ class WargameLobby(broadcastable.Broadcastable):
   def handle_set_self_ready(self, session, message):
     session['ready'] = message['ready'] == 'true'
       
-    self.broadcast({ 'session' : 'wargame_lobby' }, { 'action' : 'game_lobby_player_ready_state', \
+    self.broadcast({ 'session' : 'wargame_lobby' }, { 'action' : 'wargame_lobby_player_ready_state', \
                                                      'ready' : message['ready'], 'username' : session.username } )
 
   def send_handshake(self, session):
-    session.write( { 'action': 'game_lobby_game_capabilities' , 
+    session.write( { 'action': 'wargame_lobby_game_capabilities' , 
                      'capabilities' : self.capabilities,
                      'available_colors' : self.available_colors })
     
@@ -85,7 +85,7 @@ class WargameLobby(broadcastable.Broadcastable):
 
     if message['color'] not in self.available_colors:
       logging.debug("User provided an invalid or taken color")
-      session.write({'action' : 'game_lobby_set_self_color', 'status' : 'error', 'reason' : 'invalid or already taken color {0}'.format(message['color'])})
+      session.write({'action' : 'wargame_lobby_set_self_color', 'status' : 'error', 'reason' : 'invalid or already taken color {0}'.format(message['color'])})
       return
     elif 'self_color' in session:
       logging.debug("User already have a color [{0}] defined, removing it and trying to define the new color".format(session['self_color']))
@@ -97,8 +97,8 @@ class WargameLobby(broadcastable.Broadcastable):
       session['self_color'] = message['color']
       self.available_colors.remove(message['color'])
     
-    self.broadcast( { 'session' : 'game_lobby' }, { 'action' : 'game_lobby_player_updated_color', 'username' : session.username,  'color' : message['color'] })
-    self.broadcast( { 'session' : 'game_lobby' }, { 'action' : 'game_lobby_available_colors', 'colors' : self.available_colors })
+    self.broadcast( { 'session' : 'wargame_lobby' }, { 'action' : 'wargame_lobby_player_updated_color', 'username' : session.username,  'color' : message['color'] })
+    self.broadcast( { 'session' : 'wargame_lobby' }, { 'action' : 'wargame_lobby_available_colors', 'colors' : self.available_colors })
     
   def handle_send_lobby_chat(self, session, message):
     logging.debug("Handling chat message")
@@ -117,12 +117,12 @@ class WargameLobby(broadcastable.Broadcastable):
     if session in self.game_lobby_sessions:
         self.game_lobby_sessions.remove(session)
 
-    msg = { u'action' : 'game_lobby_session_logout', u'username' : session.username , u'user_id' : session.user_id }
+    msg = { u'action' : 'wargame_lobby_session_logout', u'username' : session.username , u'user_id' : session.user_id }
     self.broadcast({u'session' : 'lobby'} , msg)
   
   def add_session(self, session, logon_message):
     if len(self.game_lobby_sessions) >= war.MAX_PLAYERS:
-      session.write( { 'action' : 'game_lobby_join', 'status' : 'error' , 'reason' : 'Max players reached :(' })
+      session.write( { 'action' : 'wargame_lobby_join', 'status' : 'error' , 'reason' : 'Max players reached :(' })
       return False
 
     session.incoming_message_handler = self.on_session_message
