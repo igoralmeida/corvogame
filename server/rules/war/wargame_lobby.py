@@ -71,7 +71,7 @@ class WargameLobby(broadcastable.Broadcastable):
   def handle_set_self_ready(self, session, message):
     session['ready'] = message['ready'] == 'true'
       
-    self.broadcast({ 'session' : 'game_lobby' }, { 'action' : 'game_lobby_player_ready_state', \
+    self.broadcast({ 'session' : 'wargame_lobby' }, { 'action' : 'game_lobby_player_ready_state', \
                                                      'ready' : message['ready'], 'username' : session.username } )
 
   def send_handshake(self, session):
