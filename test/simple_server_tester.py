@@ -38,8 +38,10 @@ class Client(ClientHandler):
         lobby_actions = [ ('say something' , { 'action' : 'lobby_chat', 'fields' : [ ('message', str, True) ] }),
                           ('create game' , { 'action' : 'lobby_create_game', 'fields' : [('game_type', str, True), ('room_name', str, True) ] } ) ]
         
-        game_lobby_actions  = [ ('say something' , { 'action' : 'lobby_chat', 'fields' : [ ('message', str, True) ] }),
-                                ('change color', { 'action' : 'lobby_set_self_color', 'fields' : [ ('color', str, True) ] } ) ]
+        game_lobby_actions  = [ ('say something' , { 'action' : 'wargame_lobby_chat', 'fields' : [ ('message', str, True) ] }),
+                                ('change color', { 'action' : 'wargame_lobby_set_self_color', 'fields' : [ ('color', str, True) ] } ),
+                                ('set ready' , { 'action' : 'wargame_lobby_set_self_ready', 'fields' : [ ('ready', str, True) ] }),
+                                ('start game', { 'action' : 'wargame_lobby_start_game' , 'fields' : [] } ) ]
         
         self.menu = [ lobby_actions, game_lobby_actions ]
         
