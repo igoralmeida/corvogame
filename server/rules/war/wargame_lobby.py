@@ -17,6 +17,7 @@ from common import broadcastable
 import logging
 import copy
 import war
+import wargame
 
 class WargameLobby(broadcastable.Broadcastable):
   COLORS = ['red','blue','black','green','yellow','white']
@@ -61,7 +62,7 @@ class WargameLobby(broadcastable.Broadcastable):
       session.write( { 'action' : 'wargame_lobby_start_game', 'status' : 'error', 'reason' : 'there are players not have a color defined' } )
       return
     
-    game = war.wargame.Wargame()
+    game = wargame.Wargame()
     
     for session in self.game_lobby_sessions:
         game.register_session(session)

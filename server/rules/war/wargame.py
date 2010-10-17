@@ -300,8 +300,8 @@ class Wargame(broadcastable.Broadcastable):
 
         self.remove_from_broadcast(session)
 
-        if session.username in self.sessions:
-            del self.sessions[session.username]
+        if session in self.playing_sessions:
+            self.playing_sessions.pop(session)
 
         #TODO: What to do here? end the game?
         
