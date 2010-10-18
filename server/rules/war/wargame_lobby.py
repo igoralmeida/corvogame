@@ -26,7 +26,7 @@ class WargameLobby(broadcastable.Broadcastable):
     logging.debug("Initializing wargame internal lobby")
     
     broadcastable.Broadcastable.__init__(self)
-    self.game_lobby_sessions = [ room_owner ]
+    self.game_lobby_sessions = []
     self.main_lobby = main_lobby
     self.room_owner = room_owner
     self.room_name = room_configuration['room_name']
