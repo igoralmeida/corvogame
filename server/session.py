@@ -41,11 +41,9 @@ class Session(ClientHandler):
             del self.message_validators[action]
 
     def __setitem__(self, key, value):
-        print 'setitem {0} {1}'.format(key,value)
         self.data_holder[key] = value
     
     def __getitem__(self, key):
-        print 'getitem {0}'.format(key)
         if key in self.data_holder:
           return self.data_holder[key]
         raise StopIteration
