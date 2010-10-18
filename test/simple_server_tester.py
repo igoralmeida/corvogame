@@ -33,7 +33,8 @@ class Client(ClientHandler):
                                  'lobby_session_logon' : self.session_logon,
                                  'lobby_info' : self.handle_lobby_info,
                                  'logon_response' : self.handle_session_logon,
-                                 'lobby_create_game' : self.handle_game_create }
+                                 'lobby_create_game' : self.handle_game_create,
+                                 'wargame_handshake' : self.handle_wargame_handshake }
 
         lobby_actions = [ ('say something' , { 'action' : 'lobby_chat', 'fields' : [ ('message', str, True) ] }),
                           ('create game' , { 'action' : 'lobby_create_game', 'fields' : [('game_type', str, True), ('room_name', str, True) ] } ) ]
@@ -43,7 +44,12 @@ class Client(ClientHandler):
                                 ('set ready' , { 'action' : 'wargame_lobby_set_self_ready', 'fields' : [ ('ready', str, True) ] }),
                                 ('start game', { 'action' : 'wargame_lobby_start_game' , 'fields' : [] } ) ]
         
-        self.menu = [ lobby_actions, game_lobby_actions ]
+        in_game_actions = [ ('remove a piece', {'action' : 'wargame_remove_piece', 'fields' : [ ('from', str, True) ] } ),
+                            ('add a piece', {'action' : 'wargame_add_piece', 'fields' : [ ('to', str, True) ] } ),
+                            ('say something' , { 'action' : 'wargame_chat', 'fields' : [ ('message', str, True ) ] } ),
+                            ('attack a land', {'action' : 'wargame_attack_land', 'fields' : [ ('quantity', str, True), ('from', str, True), ('to', str, True) ] } ) ]                                               
+        
+        self.menu = [ lobby_actions, game_lobby_actions, in_game_actions ]
         
         self.current_state = self.LOBBY
         
@@ -112,6 +118,9 @@ class Client(ClientHandler):
       else:
         print 'error creating game: ', message
       
+    def handle_wargame_handshake(self, message):
+        self.current_state = self.IN_GAME
+        
     def handle_session_logon(self, message):
         print 'received seession logon response: ', message
         if message['authenticated'] == 'yes':
