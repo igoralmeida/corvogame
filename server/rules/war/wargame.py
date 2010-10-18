@@ -302,10 +302,7 @@ class Wargame(broadcastable.Broadcastable):
         logging.debug("Handling session disconnect for session {0}".format(session.username))
 
         self.remove_from_broadcast(session)
-
-        if session in self.playing_sessions:
-            self.playing_sessions.pop(session)
-
+        self.playing_sessions.remove(session)
         #TODO: What to do here? end the game?
         
         msg = { u'action' : 'wargame_session_logout', u'username' : session.username , u'user_id' : session.user_id }
@@ -346,7 +343,8 @@ class Wargame(broadcastable.Broadcastable):
         session.inject_validators(self.validations)
         
         self.playing_sessions.append(session)
-     
+        self.add_to_broadcast(session)
+        
     def on_session_message(self, session, message):
         logging.debug("Received message {0} from user {1}".format(message, session.username))
         if message["action"] in self.handlers:
