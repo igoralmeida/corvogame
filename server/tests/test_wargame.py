@@ -40,7 +40,7 @@ def test_sorted_objectives():
         
     map ( asserter , sessions )
 
-def test_simple_game():
+def start_game():
     random.seed(10)
         
     sessions = []
@@ -56,8 +56,23 @@ def test_simple_game():
         assert session.expect('wargame_startup_info')
         
     map(lambda x: assert_initial_data(x), sessions)
+
+
+def test_get_continents():
+    game = wargame.Wargame()
+    
+    mock = { 'land_data' : dict(map(lambda land: (land, 0) , game.CONTINENTS['South America'])) }
+    
+    continents = game.get_continents(mock)
+    
+    assert 'South America' in continents
+
+    mock['land_data'].update(dict(map(lambda land: (land, 0) , game.CONTINENTS['North America'])))
+    
+    continents = game.get_continents(mock)
+    
+    assert 'South America' and 'North America' in continents
     
     
-    
-    
-        
+
+

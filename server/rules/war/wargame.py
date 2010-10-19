@@ -18,6 +18,7 @@ import random
 import logging
 from threading import Timer
 import logging
+import math
 
 class Wargame(broadcastable.Broadcastable):
     TURN_TIMER = 30
@@ -133,6 +134,15 @@ class Wargame(broadcastable.Broadcastable):
       'Conquest in totallity Europe, South America and one more continent at your choice.'
     ]
     
+    PIECES_PER_CONTINENT = {
+      'South America' : 4,
+      'North America' : 5,
+      'Africa' : ['Niger','Egypt','Sudan','Congo','South Africa','Madagascar'],
+      'Europe' : 5,
+      'Asia' : ['Middle Orient','Aral','Omsk','India','Vietna','China','Mongolia','Tchita','Siberia','Vladvostok','Japan','Dudinka'],
+      'Oceania' : [ 'Sumatra','Borneo','New Guine','Australia'] 
+    }
+    
     #Defeat the Red army
     def check_objective_0(self, player):
         pass
@@ -180,7 +190,21 @@ class Wargame(broadcastable.Broadcastable):
         
     def check_objective_13(self, player):
         pass
-
+        
+    def get_continents(self, player):
+        #iters over continents, and for each one filter the lands that are NOT in player data
+        #this is to make the size of the sublist as small as possible
+        return [ continent for continent in self.CONTINENTS
+                     if not filter (lambda continent_land: continent_land not in player['land_data'], self.CONTINENTS[continent]) ]
+    
+    def get_player_turn_pieces(self, player):
+        #get the default pieces and add the bonuses per continent
+        pieces = int(math.floor(len(player['land_data']) / 2))
+        if pieces < 3: pieces = 3
+        pieces += sum([self.PIECES_PER_CONTINENT[continent] for continent in self.get_continents(player)])
+        
+        return pieces
+    
     def __init__(self):
         broadcastable.Broadcastable.__init__(self)
 
