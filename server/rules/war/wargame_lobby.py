@@ -20,8 +20,8 @@ import war
 import wargame
 
 class WargameLobby(broadcastable.Broadcastable):
-  COLORS = ['red','blue','black','green','yellow','white']
   
+    
   def __init__(self, main_lobby, room_owner, room_configuration, game_id):
     logging.debug("Initializing wargame internal lobby")
     
@@ -41,7 +41,7 @@ class WargameLobby(broadcastable.Broadcastable):
                           'wargame_lobby_chat' : [ 'message' ]  }
     
     self.capabilities = [ 'can_set_self_color', 'can_start_game', 'can_set_self_ready' ]   
-    self.available_colors = copy.copy(self.COLORS)
+    self.available_colors = copy.copy(war.COLORS)
     
     self.start()
   

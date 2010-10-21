@@ -137,59 +137,75 @@ class Wargame(broadcastable.Broadcastable):
     PIECES_PER_CONTINENT = {
       'South America' : 4,
       'North America' : 5,
-      'Africa' : ['Niger','Egypt','Sudan','Congo','South Africa','Madagascar'],
+      'Africa' : 4,
       'Europe' : 5,
-      'Asia' : ['Middle Orient','Aral','Omsk','India','Vietna','China','Mongolia','Tchita','Siberia','Vladvostok','Japan','Dudinka'],
-      'Oceania' : [ 'Sumatra','Borneo','New Guine','Australia'] 
+      'Asia' : 7,
+      'Oceania' : 2
     }
+    
+    def check_defeated(self, color):
+        for player in self.playing_sessions:
+            if player['self_color'] == color and not len(player['land_data']):
+                return True
+        return False      
     
     #Defeat the Red army
     def check_objective_0(self, player):
-        pass
-        
+        return self.check_defeated('red')
+                        
     #Defeat the White army
     def check_objective_1(self, player):
-        pass
+        return self.check_defeated('white')
     
     #Defeat the Blue army
     def check_objective_2(self, player):
-        pass
+        return self.check_defeated('blue')
     
     #Defeat the Black Army
     def check_objective_3(self, player):
-        pass    
+        return self.check_defeated('black')
 
     #Defeat the Green army        
     def check_objective_4(self, player):
-        pass
+        return self.check_defeated('green')
 
     #Defeat the Yellow army
     def check_objective_5(self, player):
-        pass
+        return self.check_defeated('yellow')
     
+    #Conquest Asia and South America in totallity.
     def check_objective_6(self, player):
-        pass
-        
+        return 'Asia' and 'South America' in self.get_continents(player)
+    
+    #Conquest 18 territories and ocupy every one of them with at least 2 troops.
     def check_objective_7(self, player):
-        pass
+        return len(player['land_data']) >= 18 and reduce(lambda x,y : x['count'] + y['count'], player['land_data']) >= 36 
 
+    #Conquest North America and Oceania in totallity.
     def check_objective_8(self, player):
-        pass
-        
+        return 'North America' and 'Oceania' in self.get_continents(player)
+    
+    #Conquest Europe, Oceania and one more continent at your choice.
     def check_objective_9(self, player):
-        pass
-        
+        continents = self.get_continents(player)
+        return 'Europe' and 'Oceania' in continents and len(continents) >= 3
+    
+    #Conquest North America and Africa in totallity.
     def check_objective_10(self, player):
-        pass
+        return 'North America' and 'Africa' in self.get_continents(player)
         
+    #Conquest Asia and Africa in totallity.
     def check_objective_11(self, player):
-        pass
-        
+        return 'Asia' and 'Africa' in self.get_continents(player)
+    
+    #Conquest 24 territories at your choice.
     def check_objective_12(self, player):
-        pass
+        return len(player['land_data']) >= 24
         
+    #Conquest in totallity Europe, South America and one more continent at your choice.
     def check_objective_13(self, player):
-        pass
+        continents = self.get_continents(player)
+        return 'Europe' and 'South America' in continents and len(continents) >= 3
         
     def get_continents(self, player):
         #iters over continents, and for each one filter the lands that are NOT in player data
@@ -302,7 +318,7 @@ class Wargame(broadcastable.Broadcastable):
 
     def set_player_data(self, players):
         for player in players:
-            player['remaining_pieces'] = len(player['land_data'])
+            player['remaining_pieces'] = self.get_player_turn_pieces(player)
     
     def start_game(self):
         logging.debug('Starting a wargame game')
@@ -320,7 +336,8 @@ class Wargame(broadcastable.Broadcastable):
         self.active_player = -1
         self.notify_turn_change()
 
-        self.player_deadline_timer = Timer(1, self.handle_turn_timer_update)
+        self.player_deadline_timer = Timer(0, self.handle_turn_timer_update)
+        self.player_deadline_timer.start()
         
     def handle_session_disconnect(self, session):
         logging.debug("Handling session disconnect for session {0}".format(session.username))
@@ -334,24 +351,38 @@ class Wargame(broadcastable.Broadcastable):
             
     def notify_turn_change(self):
         logging.debug('Updating turn')
-        self.active_player += 1
+        self.active_player += 5
+        player = self.playing_sessions[self.active_player % len(self.playing_sessions)]
+        
+        player['remaining_pieces'] = self.get_player_turn_pieces(player)
+        
         self.broadcast(None, { 'action' : 'wargame_status_update_turn', 
-                               'player' : self.playing_sessions[self.active_player % len(self.playing_sessions)].username } )
+                               'player' : player.username,
+                               'remaining_pieces' : player['remaining_pieces'] } )
     
     def handle_turn_timer_update(self):
         logging.debug('Updating turn timer.')
+        def timer_tick():
+            self.player_deadline_timer = Timer(5, self.handle_turn_timer_update)   
+            self.player_deadline_timer.start()         
+
         if self.turn_total_time >= self.TURN_TIMER:
             self.notify_turn_change()
+            self.turn_total_time = 0
+           
+            timer_tick()
             return
 
-        self.player_deadline_timer = Timer(1, self.handle_turn_timer_update)
         self.turn_total_time += 1
         
         self.playing_sessions[self.active_player % len(self.playing_sessions)].write({'action' : 'wargame_turn_tick',
-                                                                                      'time' : self.turn_total_time,
-                                                                                      'remaining' : self.TURN_TIMER - self.turn_total_time })
-
+                                                                                      'time' : self.turn_total_time })
+        timer_tick()
+        
     def stop(self):
+        if self.player_deadline_timer:
+            self.player_deadline_timer.cancel()
+    
         broadcastable.Broadcastable.stop(self)
     
     def send_handshake(self, session):

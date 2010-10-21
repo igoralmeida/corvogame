@@ -21,6 +21,9 @@ MAX_PLAYERS = 6
 AUTHOR= 'Victor Vicente de Carvalho'
 VERSION= '0.0.1'
 
+
+COLORS = ['red','blue','black','green','yellow','white']
+
 from wargame_lobby import WargameLobby
 
 def build_lobby(**kwargs):
