@@ -74,5 +74,13 @@ def test_get_continents():
     assert 'South America' and 'North America' in continents
     
     
+def test_get_player_turn_pieces():
+    game = wargame.Wargame()
 
+    mock = { 'land_data' : dict(map(lambda land: (land, 0) , game.CONTINENTS['South America'])) }
+    
+    pieces = game.get_player_turn_pieces(mock)
+    
+    assert pieces == 7
+    
 

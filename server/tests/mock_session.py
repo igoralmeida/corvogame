@@ -28,7 +28,7 @@ class MockSession (object):
     return item in self.data_holder
   
   def expect(self, action):
-    for i in xrange(10):
+    for i in xrange(50):
       if action not in self.received_messages.keys():
         time.sleep(0.1)
       else:
