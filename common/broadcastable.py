@@ -24,8 +24,8 @@ class Broadcastable(threading.Thread):
         threading.Thread.__init__(self)
         self.to_broadcast = []
         self.message_queue = Queue.Queue()
-        self.is_alive = True
-
+        self.running = True
+        
     def add_to_broadcast(self, item):
         self.to_broadcast.append(item)
 
@@ -34,7 +34,7 @@ class Broadcastable(threading.Thread):
             self.to_broadcast.remove(item)
 
     def stop(self):
-        self.is_alive = False
+        self.running = False
         self.message_queue.put(None)
 
     def broadcast(self, from_item, message):
@@ -44,7 +44,7 @@ class Broadcastable(threading.Thread):
 
     def run(self):
         logging.debug("Initializing broadcast thread")
-        while self.is_alive:
+        while self.running:
             try:
                 try:
                     message = self.message_queue.get()
