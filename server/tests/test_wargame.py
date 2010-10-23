@@ -6,6 +6,7 @@ sys.path.append('../rules')
 from mock_session import MockSession
 from war import wargame
 import random
+import war
 
 def test_session_sorted_lands():
     random.seed(10)
@@ -24,6 +25,16 @@ def test_session_sorted_lands():
     sorted_lands = sum([ len(x['land_data']) for x in sessions])      
     assert sorted_lands == len(game.LANDS)
 
+def test_not_present_colors():
+    game = wargame.Wargame()
+    
+    player_mock =  [ { 'self_color' : 'red' } , { 'self_color' : 'blue' } ]
+    
+    objectives = game.OBJECTIVES
+    game.remove_not_present_colors(player_mock, objectives)
+    
+    assert not 'Defeat the White army.' in objectives and not 'Defeat the Black army.' in objectives
+
 def test_sorted_objectives():
     random.seed(10)
     sessions = []
@@ -32,6 +43,9 @@ def test_sorted_objectives():
     map(lambda x: sessions.append(MockSession('session' + str(x))), xrange(5))
     map(lambda x: game.register_session(x), sessions)
     
+    for player, color in zip(sessions, war.COLORS):
+        player['self_color'] = color
+            
     game.sort_objectives(game.OBJECTIVES, sessions)
     
     def asserter(session):
@@ -72,7 +86,6 @@ def test_get_continents():
     continents = game.get_continents(mock)
     
     assert 'South America' and 'North America' in continents
-    
     
 def test_get_player_turn_pieces():
     game = wargame.Wargame()
