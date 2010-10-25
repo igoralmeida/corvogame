@@ -49,7 +49,11 @@ class UnknownConnectionHandler(client_handler.ClientHandler):
         logging.debug("Upgrading protocol to handler {0} and setting to auth mode".format(to_handler))
         self.read_handler = self._auth_handler
         self.message_handler = to_handler
-        self.write(self.message_handler.to_string({ u'action' : 'connection_response', u'accepted' : 'yes', u'result_text' : u'Protocol accepted. Using {0}'.format(to_handler.NAME) }))
+        self.write(self.message_handler.to_string({
+            u'action' : 'connection_response',
+            u'accepted' : 'yes',
+            u'result_text' : u'Protocol accepted. Using {0}'.format(to_handler.NAME)
+        }))
 
     def _unknown_protocol_message(self, data):
         ''' handshake handler. basically it checks if the client has inputted an
@@ -80,14 +84,26 @@ class UnknownConnectionHandler(client_handler.ClientHandler):
                 logging.debug("Authentication suceed, promoting to session")
                 self.username = username
                 logging.debug(self.message_handler.to_string)
-                self.write(self.message_handler.to_string({ u'action' : 'logon_response', u'authenticated' : u'yes' , u'result_text' : u'Connected successfully.' }))
+                self.write(self.message_handler.to_string({
+                    u'action' : 'logon_response',
+                    u'authenticated' : u'yes',
+                    u'result_text' : u'Connected successfully.'
+                }))
                 self.read_handler = None
                 self.server.promote_to_session(self, self.message_handler, self.addr)
             else:
-                self.write(self.message_handler.to_string({ u'action' : 'logon_response', u'authenticated' : u'no' , u'result_text' : u'Invalid username or password.' }))
+                self.write(self.message_handler.to_string({
+                    u'action' : 'logon_response',
+                    u'authenticated' : u'no',
+                    u'result_text' : u'Invalid username or password.'
+                }))
                 #TODO shouldn't we terminate the connection after some tries?
 
         except KeyError,AssertionError:
             logging.debug("Invalid logon message. Rejecting")
-            self.write(self.message_handler.to_string({ u'action' : 'logon_response', u'result' : u"Invalid logon message: {0}".format(readed[0]) }))
+            self.write(self.message_handler.to_string({
+                u'action' : 'logon_response',
+                u'authenticated' : u'no',
+                u'result_text' : u"Invalid logon message: {0}".format(message)
+            }))
             self.shutdown()

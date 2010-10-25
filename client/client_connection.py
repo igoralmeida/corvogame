@@ -43,6 +43,8 @@ class Client(client_handler.ClientHandler):
 
         self.message_handlers = {}
 
+        self.lh = None #LobbyHandler reference for future handover
+
     def signal_ui(self, message):
         ''' Signal the UI something important has happened.
         The messages are the dictionaries in ui_messages.py
@@ -104,7 +106,9 @@ class Client(client_handler.ClientHandler):
         # exception.
 
         logging.debug("Client is shutting down...")
-        self.lh.shutdown()
+        if self.lh is not None:
+            self.lh.shutdown()
+        self.signal_ui(ui_messages.connection('off'))
         logging.debug("done")
 
     def handle_connect(self):
