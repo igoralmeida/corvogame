@@ -28,7 +28,6 @@ def test_setting_color():
   l.stop()
   l.join()
 
-
 def test_setting_same_color():
   room_owner = MockSession('room_owner')
   l = lobby.WargameLobby(MockLobby(),room_owner, {'room_name' : 'cocada' }, uuid.uuid1().get_hex())

@@ -19,6 +19,7 @@ import logging
 from threading import Timer
 import logging
 import math
+import copy
 
 class Wargame(broadcastable.Broadcastable):
     TURN_TIMER = 30
@@ -134,6 +135,24 @@ class Wargame(broadcastable.Broadcastable):
       'Conquest in totallity Europe, South America and one more continent at your choice.'
     ]
     
+    COLOR_TO_OBJECTIVE_INDEX = {
+        'red' : 0,
+        'white' : 1,
+        'blue' : 2,
+        'black' : 3,
+        'green' : 4,
+        'yellow' : 5 
+    }
+    
+    OBJECTIVE_TO_COLOR = {
+        'Defeat the Red army.' : 'red',
+        'Defeat the White army.' : 'white',
+        'Defeat the Blue army.' : 'blue',
+        'Defeat the Black army.' : 'black',
+        'Defeat the Green army.' : 'green',
+        'Defeat the Yellow army.' : 'yellow'    
+    }
+    
     PIECES_PER_CONTINENT = {
       'South America' : 4,
       'North America' : 5,
@@ -228,17 +247,28 @@ class Wargame(broadcastable.Broadcastable):
         self.handlers = { 'wargame_add_piece' : self.handle_wargame_add_piece,
                           'wargame_remove_piece' : self.handle_wargame_remove_piece, 
                           'wargame_attack_land' :  self.handle_wargame_attack_land,
-                          'wargame_chat': self.handle_wargame_chat  }
+                          'wargame_chat': self.handle_wargame_chat,
+                          'wargame_end_turn': self.handle_wargame_end_turn  }
 
         self.validations = { 'wargame_add_piece'   : [ 'to',  'quantity'],
                                     'wargame_remove_piece': [ 'from','quantity'],
                                     'wargame_attack_land' : [ 'to' , 'from' , 'quantity' ],
                                     'wargame_chat'        : [ 'message' ] }
 
-        self.turn_deadline_timer = None
+        self.player_deadline_timer = None
         self.turn_total_time = 0
 
         self.start()
+
+    def handle_wargame_end_turn(self, session, message):
+        if not self.validate_is_player_turn(session):
+            return
+            
+        if session['objective_checker'](session):
+            #player won the game
+            self.broadcast({'action' : 'wargame_game_update', 'text' : 'player {0} won the game!'.format(session.username) })
+            self.broadcast({'action' : 'wargame_game_update_status', 'status' : 'shutdown' , 'reason' : 'game has ended' })            
+            return
 
     def handle_wargame_chat(self, session, message):
         logging.debug("Handling chat message for session {0}".format(message))
@@ -306,8 +336,28 @@ class Wargame(broadcastable.Broadcastable):
             player['land_data'][land] = { 'count' : 0 }
             player['over_landed'] = True
 
+    #removing objectives for where a player color is not present
+    #ugly code, improve this!
+    def remove_not_present_colors(self, players, objectives):
+        mapped_objectives = ['red', 'white', 'blue', 'black', 'green', 'yellow']        
+        player_colors = [player['self_color'] for player in players]
+        
+        not_present_objectives = map(lambda item: self.OBJECTIVES[mapped_objectives.index(item)] , 
+                                        filter(lambda color: color not in player_colors, mapped_objectives))
+
+        map(lambda item: objectives.remove(item), not_present_objectives)
+        
     def sort_objectives(self, objectives, players):
-        sorted_objectives = random.sample(objectives, len(players))
+        objectives = copy.copy(objectives)
+ 
+        self.remove_not_present_colors(players, objectives)
+
+        def re_sort():
+            return random.sample(objectives, len(players))
+        
+        sorted_objectives = re_sort()
+        while filter(lambda zipped: zipped[0]['self_color'] == self.OBJECTIVE_TO_COLOR[zipped[1]], zip(players, sorted_objectives)):
+            sorted_objectives = re_sort() 
         
         for player, objective in zip(players, sorted_objectives):
             player['objective'] = objective
@@ -351,7 +401,7 @@ class Wargame(broadcastable.Broadcastable):
             
     def notify_turn_change(self):
         logging.debug('Updating turn')
-        self.active_player += 5
+        self.active_player += 1
         player = self.playing_sessions[self.active_player % len(self.playing_sessions)]
         
         player['remaining_pieces'] = self.get_player_turn_pieces(player)
@@ -359,6 +409,10 @@ class Wargame(broadcastable.Broadcastable):
         self.broadcast(None, { 'action' : 'wargame_status_update_turn', 
                                'player' : player.username,
                                'remaining_pieces' : player['remaining_pieces'] } )
+
+        self.turn_total_time = 0                               
+        self.player_deadline_timer = Timer(5, self.handle_turn_timer_update)   
+        self.player_deadline_timer.start()                                   
     
     def handle_turn_timer_update(self):
         logging.debug('Updating turn timer.')
@@ -368,13 +422,10 @@ class Wargame(broadcastable.Broadcastable):
 
         if self.turn_total_time >= self.TURN_TIMER:
             self.notify_turn_change()
-            self.turn_total_time = 0
-           
-            timer_tick()
+
             return
 
-        self.turn_total_time += 1
-        
+        self.turn_total_time += 5        
         self.playing_sessions[self.active_player % len(self.playing_sessions)].write({'action' : 'wargame_turn_tick',
                                                                                       'time' : self.turn_total_time })
         timer_tick()

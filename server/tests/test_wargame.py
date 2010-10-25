@@ -24,6 +24,9 @@ def test_session_sorted_lands():
     
     sorted_lands = sum([ len(x['land_data']) for x in sessions])      
     assert sorted_lands == len(game.LANDS)
+    
+    game.stop()
+    game.join()
 
 def test_not_present_colors():
     game = wargame.Wargame()
@@ -34,6 +37,9 @@ def test_not_present_colors():
     game.remove_not_present_colors(player_mock, objectives)
     
     assert not 'Defeat the White army.' in objectives and not 'Defeat the Black army.' in objectives
+
+    game.stop()
+    game.join()
 
 def test_sorted_objectives():
     random.seed(10)
@@ -53,6 +59,9 @@ def test_sorted_objectives():
         assert 'objective_checker' in session
         
     map ( asserter , sessions )
+    
+    game.stop()
+    game.join()
 
 def start_game():
     random.seed(10)
@@ -70,7 +79,9 @@ def start_game():
         assert session.expect('wargame_startup_info')
         
     map(lambda x: assert_initial_data(x), sessions)
-
+    
+    game.stop()
+    game.join()
 
 def test_get_continents():
     game = wargame.Wargame()
@@ -86,6 +97,9 @@ def test_get_continents():
     continents = game.get_continents(mock)
     
     assert 'South America' and 'North America' in continents
+
+    game.stop()
+    game.join()
     
 def test_get_player_turn_pieces():
     game = wargame.Wargame()
@@ -96,4 +110,5 @@ def test_get_player_turn_pieces():
     
     assert pieces == 7
     
-
+    game.stop()
+    game.join()
