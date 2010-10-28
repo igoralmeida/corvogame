@@ -115,7 +115,9 @@ class Lobby(broadcastable.Broadcastable):
     def stop(self):
         broadcastable.Broadcastable.stop(self)
         
-        map(lambda x: x.shutdown(), self.sessions.values())        
+        map(lambda x: x.shutdown(), self.sessions.values())
+        map(lambda game: self.games[game].stop() , self.games)
+        
         self.sessions.clear()
         self.handlers.clear()
         
