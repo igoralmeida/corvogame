@@ -42,6 +42,7 @@ class WargameLobby(broadcastable.Broadcastable):
     
     self.capabilities = [ 'can_set_self_color', 'can_start_game', 'can_set_self_ready' ]   
     self.available_colors = copy.copy(war.COLORS)
+    self.game = None
     
     self.start()
   
@@ -62,12 +63,23 @@ class WargameLobby(broadcastable.Broadcastable):
       session.write( { 'action' : 'wargame_lobby_start_game', 'status' : 'error', 'reason' : 'there are players not have a color defined' } )
       return
     
-    game = wargame.Wargame()
+    self.game = wargame.Wargame()
     
     for session in self.game_lobby_sessions:
-        game.register_session(session)
+        self.game.register_session(session)
     
-    game.start_game()
+    self.game.start_game()
+  
+  def stop(self):
+    logging.debug("Trying to stop game...")
+    if self.game:
+        logging.debug("Game was running, stopping it...")
+        self.game.stop()
+        self.game.join()
+        logging.debug("done.")  
+  
+    broadcastable.Broadcastable.stop(self)
+    logging.debug("Done stopping game.")    
   
   def handle_set_self_ready(self, session, message):
     session['ready'] = message['ready'] == 'true'
