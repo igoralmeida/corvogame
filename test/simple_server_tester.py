@@ -47,7 +47,8 @@ class Client(ClientHandler):
         in_game_actions = [ ('remove a piece', {'action' : 'wargame_remove_piece', 'fields' : [ ('from', str, True) ] } ),
                             ('add a piece', {'action' : 'wargame_add_piece', 'fields' : [ ('to', str, True) ] } ),
                             ('say something' , { 'action' : 'wargame_chat', 'fields' : [ ('message', str, True ) ] } ),
-                            ('attack a land', {'action' : 'wargame_attack_land', 'fields' : [ ('quantity', str, True), ('from', str, True), ('to', str, True) ] } ) ]                                               
+                            ('attack a land', {'action' : 'wargame_attack_land', 'fields' : [ ('quantity', str, True), ('from', str, True), ('to', str, True) ] } ),
+                            ('end turn' , { 'action' : 'wargame_end_turn', 'fields' : [] }  ) ]                                               
         
         self.menu = [ lobby_actions, game_lobby_actions, in_game_actions ]
         
