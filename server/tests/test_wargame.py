@@ -112,3 +112,15 @@ def test_get_player_turn_pieces():
     
     game.stop()
     game.join()
+ 
+ def test_objectives():
+    game = wargame.Wargame()
+    
+    mock = { 'land_data' : dict(map(lambda land: (land, 0) , game.CONTINENTS['South America'])) }
+    
+    
+    assert game.check_objective_7(mock) == False
+    
+ 
+ 
+ 
