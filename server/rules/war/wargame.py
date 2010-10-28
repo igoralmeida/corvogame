@@ -183,7 +183,7 @@ class Wargame(broadcastable.Broadcastable):
     #Defeat the Black Army
     def check_objective_3(self, player):
         return self.check_defeated('black')
-
+    logging.debug("Trying to stop game...")
     #Defeat the Green army        
     def check_objective_4(self, player):
         return self.check_defeated('green')
@@ -266,8 +266,16 @@ class Wargame(broadcastable.Broadcastable):
             
         if session['objective_checker'](session):
             #player won the game
-            self.broadcast({'action' : 'wargame_game_update', 'text' : 'player {0} won the game!'.format(session.username) })
-            self.broadcast({'action' : 'wargame_game_update_status', 'status' : 'shutdown' , 'reason' : 'game has ended' })            
+            session.write({'action' : 'wargame_game_update_status' , 'status' : 'ended', 'reason' : 'You won the game!' })
+            
+            for s in self.playing_sessions:
+                if s != session:
+                    session.write({'action' : 'wargame_game_update_status' , 'status' : 'ended', 'reason' : 'You lose the game!' })                          
+            
+            self.broadcast(None, {'action' : 'wargame_game_update', 'text' : 'player {0} won the game!'.format(session.username) })
+            self.broadcast(None, {'action' : 'wargame_game_update_status', 'status' : 'shutdown' , 'reason' : 'game has ended' })
+            self.player_deadline_timer.cancel()
+                   
             return
 
     def handle_wargame_chat(self, session, message):
@@ -276,8 +284,11 @@ class Wargame(broadcastable.Broadcastable):
         self.broadcast(session, message)
     
     def validate_is_player_turn(self, session):
-        logging.debug('Validating valid turn for session {0}'.format(session))
-        if not self.playing_sessions[self.active_player] == session:
+        logging.debug('Validating valid turn for session {0}, current session is {1}'.format(session, self.playing_sessions[self.active_player %  len(self.playing_sessions)]))
+        
+        current_session = self.playing_sessions[self.active_player %  len(self.playing_sessions)]
+        if not current_session  == session:
+            logging.debug('Validating valid turn for session {0}'.format(session))
             session.write({'action' : 'wargame_forbidden_action', 'reason' : 'not your turn' })
             return False
         
@@ -356,7 +367,8 @@ class Wargame(broadcastable.Broadcastable):
             return random.sample(objectives, len(players))
         
         sorted_objectives = re_sort()
-        while filter(lambda zipped: zipped[0]['self_color'] == self.OBJECTIVE_TO_COLOR[zipped[1]], zip(players, sorted_objectives)):
+        while filter(lambda zipped: zipped[1] in self.OBJECTIVE_TO_COLOR and
+                                    zipped[0]['self_color'] == self.OBJECTIVE_TO_COLOR[zipped[1]], zip(players, sorted_objectives)):
             sorted_objectives = re_sort() 
         
         for player, objective in zip(players, sorted_objectives):
@@ -415,7 +427,10 @@ class Wargame(broadcastable.Broadcastable):
         self.player_deadline_timer.start()                                   
     
     def handle_turn_timer_update(self):
-        logging.debug('Updating turn timer.')
+        logging.debug("Updating turn timer. I'm alive? {0}".format(self.running))
+        if not self.running:
+            return
+            
         def timer_tick():
             self.player_deadline_timer = Timer(5, self.handle_turn_timer_update)   
             self.player_deadline_timer.start()         
@@ -431,10 +446,13 @@ class Wargame(broadcastable.Broadcastable):
         timer_tick()
         
     def stop(self):
+        logging.debug('Stopping wargame game...')
         if self.player_deadline_timer:
             self.player_deadline_timer.cancel()
+            self.player_deadline_timer = None
     
         broadcastable.Broadcastable.stop(self)
+        logging.debug('Done stopping game.')        
     
     def send_handshake(self, session):
         logging.debug('sending handshake to {0}'.format(session))
