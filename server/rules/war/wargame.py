@@ -183,7 +183,7 @@ class Wargame(broadcastable.Broadcastable):
     #Defeat the Black Army
     def check_objective_3(self, player):
         return self.check_defeated('black')
-    logging.debug("Trying to stop game...")
+    
     #Defeat the Green army        
     def check_objective_4(self, player):
         return self.check_defeated('green')
@@ -194,28 +194,29 @@ class Wargame(broadcastable.Broadcastable):
     
     #Conquest Asia and South America in totallity.
     def check_objective_6(self, player):
-        return 'Asia' and 'South America' in self.get_continents(player)
+        return ('Asia' and 'South America') in self.get_continents(player)
     
     #Conquest 18 territories and ocupy every one of them with at least 2 troops.
     def check_objective_7(self, player):
-        return len(player['land_data']) >= 18 and reduce(lambda x,y : x['count'] + y['count'], player['land_data']) >= 36 
+        land_data = player['land_data']
+        return len(land_data) >= 18 and reduce(lambda x, y : x + land_data[y]['count'], player['land_data'], 0) >= 36 
 
     #Conquest North America and Oceania in totallity.
     def check_objective_8(self, player):
-        return 'North America' and 'Oceania' in self.get_continents(player)
+        return ('North America' and 'Oceania') in self.get_continents(player)
     
     #Conquest Europe, Oceania and one more continent at your choice.
     def check_objective_9(self, player):
         continents = self.get_continents(player)
-        return 'Europe' and 'Oceania' in continents and len(continents) >= 3
+        return ('Europe' and 'Oceania') in continents and len(continents) >= 3
     
     #Conquest North America and Africa in totallity.
     def check_objective_10(self, player):
-        return 'North America' and 'Africa' in self.get_continents(player)
+        return ('North America' and 'Africa') in self.get_continents(player)
         
     #Conquest Asia and Africa in totallity.
     def check_objective_11(self, player):
-        return 'Asia' and 'Africa' in self.get_continents(player)
+        return ('Asia' and 'Africa') in self.get_continents(player)
     
     #Conquest 24 territories at your choice.
     def check_objective_12(self, player):
@@ -224,7 +225,7 @@ class Wargame(broadcastable.Broadcastable):
     #Conquest in totallity Europe, South America and one more continent at your choice.
     def check_objective_13(self, player):
         continents = self.get_continents(player)
-        return 'Europe' and 'South America' in continents and len(continents) >= 3
+        return ('Europe' and 'South America') in continents and len(continents) >= 3
         
     def get_continents(self, player):
         #iters over continents, and for each one filter the lands that are NOT in player data
@@ -422,7 +423,11 @@ class Wargame(broadcastable.Broadcastable):
                                'player' : player.username,
                                'remaining_pieces' : player['remaining_pieces'] } )
 
-        self.turn_total_time = 0                               
+        self.turn_total_time = 0
+                        
+        if self.player_deadline_timer:
+            self.player_deadline_timer.cancel()
+            
         self.player_deadline_timer = Timer(5, self.handle_turn_timer_update)   
         self.player_deadline_timer.start()                                   
     
