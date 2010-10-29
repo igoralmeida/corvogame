@@ -26,10 +26,14 @@ class Lobby(broadcastable.Broadcastable):
         self.start()
 
     def handle_join_game(self, session, message):
-        if 'id' in message['room_id'] and message['room_id'] in self.games:
+        logging.debug("Handling game join from {0} on room id {1}".format(session.username, message['room_id']))
+        
+        if message['room_id'] in self.games:
+          logging.debug("Trying to join on room")
+          
           session.remove_validators(self.validations)
           
-          self.games.add_session(session)
+          self.games[message['room_id']]['game_lobby'].add_session(session, message)
           self.remove_from_broadcast(session)        
 
     def handle_create_game(self, session, message):
@@ -46,7 +50,7 @@ class Lobby(broadcastable.Broadcastable):
       logging.info("Session {0} is trying to create a game of type {1} and room name of {2}".format(session.username , message['game_type'], message['room_name']))
       game_lobby = self.game_builders[message['game_type']].build_lobby(main_lobby=self, room_owner=session, room_configuration= message, game_id=game_id)
       
-      self.games[game_id]  = game_lobby
+      self.games[message['room_name']]  =  { 'room_id' : game_id, 'game_lobby' : game_lobby }
       
       logging.info("Created sucessfully")
       
@@ -56,7 +60,6 @@ class Lobby(broadcastable.Broadcastable):
       session.remove_validators(self.validations)
       
       del self.sessions[session.username]
-      
       
       session.write({ 'action' : 'lobby_create_game', 'status' : 'sucessfull', 'game_id' : game_id  })
       self.broadcast({ u'session' : 'lobby' }, { 'action' : 'lobby_game_created', 
@@ -98,7 +101,7 @@ class Lobby(broadcastable.Broadcastable):
 
     def get_rooms(self):
         logging.debug("Getting rooms")
-        return []
+        return [ { 'game_name' : game_name, 'game_id' : self.games[game_name]['room_id'] } for game_name in self.games ]
 
     def get_users(self):
         logging.debug("Getting users")
@@ -116,7 +119,7 @@ class Lobby(broadcastable.Broadcastable):
         broadcastable.Broadcastable.stop(self)
         
         map(lambda x: x.shutdown(), self.sessions.values())
-        map(lambda game: self.games[game].stop() , self.games)
+        map(lambda game: self.games[game]['game_lobby'].stop() , self.games)
         
         self.sessions.clear()
         self.handlers.clear()
