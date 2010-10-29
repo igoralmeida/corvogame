@@ -57,5 +57,5 @@ class Handler(object):
         logging.debug("Trying to decode input of type {1} : {0}".format(message, type(message)))
         try:
             return json.dumps(message) + self.separator
-        except e:
+        except Exception, e:
             logging.debug("Error processing output: {0}".format(e))
