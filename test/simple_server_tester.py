@@ -37,12 +37,13 @@ class Client(ClientHandler):
                                  'wargame_handshake' : self.handle_wargame_handshake }
 
         lobby_actions = [ ('say something' , { 'action' : 'lobby_chat', 'fields' : [ ('message', str, True) ] }),
-                          ('create game' , { 'action' : 'lobby_create_game', 'fields' : [('game_type', str, True), ('room_name', str, True) ] } ) ]
+                          ('create game' , { 'action' : 'lobby_create_game', 'fields' : [('game_type', str, True), ('room_name', str, True) ] } ),
+                          ('join game', { 'action' : 'lobby_join_game' , 'fields' : [('room_id', str, True) ] } )  ]
         
         game_lobby_actions  = [ ('say something' , { 'action' : 'wargame_lobby_chat', 'fields' : [ ('message', str, True) ] }),
                                 ('change color', { 'action' : 'wargame_lobby_set_self_color', 'fields' : [ ('color', str, True) ] } ),
                                 ('set ready' , { 'action' : 'wargame_lobby_set_self_ready', 'fields' : [ ('ready', str, True) ] }),
-                                ('start game', { 'action' : 'wargame_lobby_start_game' , 'fields' : [] } ) ]
+                                ('start game', { 'action' : 'wargame_lobby_start_game' , 'fields' : [] } )]
         
         in_game_actions = [ ('remove a piece', {'action' : 'wargame_remove_piece', 'fields' : [ ('from', str, True) ] } ),
                             ('add a piece', {'action' : 'wargame_add_piece', 'fields' : [ ('to', str, True) ] } ),
