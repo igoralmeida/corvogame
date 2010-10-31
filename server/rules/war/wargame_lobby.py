@@ -146,6 +146,8 @@ class WargameLobby(broadcastable.Broadcastable):
     self.send_handshake(session)
     self.add_to_broadcast(session)
     
+    self.broadcast(None, { 'action' : 'wargame_lobby_join', 'status' : 'successfull', 'user' : session.username, 'message' : 'user has joined lobby' } )
+    
     return True
     
   def on_session_message(self, session, message):
