@@ -47,8 +47,8 @@ class Client(ClientHandler):
                                 ('set ready' , { 'action' : 'wargame_lobby_set_self_ready', 'fields' : [ ('ready', str, True) ] }),
                                 ('start game', { 'action' : 'wargame_lobby_start_game' , 'fields' : [] } )]
         
-        in_game_actions = [ ('remove a piece', {'action' : 'wargame_remove_piece', 'fields' : [ ('from', str, True) ] } ),
-                            ('add a piece', {'action' : 'wargame_add_piece', 'fields' : [ ('to', str, True) ] } ),
+        in_game_actions = [ ('remove a piece', {'action' : 'wargame_remove_piece', 'fields' : [ ('from', str, True) , ('quantity', int, True ) ] } ),
+                            ('add a piece', {'action' : 'wargame_add_piece', 'fields' : [ ('to', str, True) , ('quantity', int, True ) ] } ),
                             ('say something' , { 'action' : 'wargame_chat', 'fields' : [ ('message', str, True ) ] } ),
                             ('attack a land', {'action' : 'wargame_attack_land', 'fields' : [ ('quantity', str, True), ('from', str, True), ('to', str, True) ] } ),
                             ('end turn' , { 'action' : 'wargame_end_turn', 'fields' : [] }  ) ]                                               
@@ -94,6 +94,7 @@ class Client(ClientHandler):
         return
       
       reqd = { True : ' (required) ', False : ' (enter to proceed) ' }
+      
       for param in self.menu[self.current_state][value][1]['fields']:
         item_value = raw_input('{0}{1}: '.format(param[0], reqd[param[2]]))        
         params[param[0]] = param[1](item_value)

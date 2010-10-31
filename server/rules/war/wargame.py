@@ -22,7 +22,7 @@ import math
 import copy
 
 class Wargame(broadcastable.Broadcastable):
-    TURN_TIMER = 30
+    TURN_TIMER = 120
     
     LANDS = [
       'Alaska' ,
@@ -317,6 +317,7 @@ class Wargame(broadcastable.Broadcastable):
             return
         
         session['land_data'][to_land]['turn_pieces'] += quantity
+        session['remaining_pieces'] -= quantity
         
         self.broadcast(None, { 'action' : 'wargame_status_update' , 'status' : 'player added piece', 'user' : session.username , 'where' : to_land, 'quantity' : message['quantity'] })
 
@@ -342,6 +343,7 @@ class Wargame(broadcastable.Broadcastable):
             return
         
         session['land_data'][to_land]['turn_pieces'] -= quantity
+        session['remaining_pieces'] += quantity
         
         self.broadcast(None, { 'action' : 'wargame_status_update' , 'status' : 'player removed a piece', 'user' : session.username , 'where' : from_land, 'quantity' : message['quantity'] })            
             
