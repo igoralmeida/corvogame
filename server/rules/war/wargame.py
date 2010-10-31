@@ -302,10 +302,24 @@ class Wargame(broadcastable.Broadcastable):
 
         to_land = message['to']
 
-        if from_land not in session['land_data']:
+        if to_land not in session['land_data']:
             session.write({ 'action' : message['action'] , 'status' : 'reject', 'reason' : 'not land owner' })
             return
-
+        
+        quantity = int(message['quantity'])
+        
+        if quantity > session['remaining_pieces']:
+            session.write({ 'action' : message['action'] , 'status' : 'reject', 'reason' : 'quantity bigger than available pieces' })
+            return
+    
+        if quantity <= 0:
+            session.write({ 'action' : message['action'] , 'status' : 'reject', 'reason' : 'quantity is zero or negative' })
+            return
+        
+        session['land_data'][to_land] += quantity
+        
+        self.broadcast(None, { 'action' : 'wargame_status_update' , 'status' : 'player added piece', 'user' : session.username , 'where' : to_land, 'quantity' : message['quantity'] })
+            
     def handle_wargame_remove_piece(self, session, message):
         pass
 
