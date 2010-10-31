@@ -316,12 +316,35 @@ class Wargame(broadcastable.Broadcastable):
             session.write({ 'action' : message['action'] , 'status' : 'reject', 'reason' : 'quantity is zero or negative' })
             return
         
-        session['land_data'][to_land] += quantity
+        session['land_data'][to_land]['turn_pieces'] += quantity
         
         self.broadcast(None, { 'action' : 'wargame_status_update' , 'status' : 'player added piece', 'user' : session.username , 'where' : to_land, 'quantity' : message['quantity'] })
-            
+
     def handle_wargame_remove_piece(self, session, message):
-        pass
+        logging.debug('Handling removing piece for session {0}'.format(session))
+        if not self.validate_is_player_turn(session):
+            return
+
+        from_land = message['from']
+
+        if from_land not in session['land_data']:
+            session.write({ 'action' : message['action'] , 'status' : 'reject', 'reason' : 'not land owner' })
+            return
+        
+        quantity = int(message['quantity'])
+        
+        if quantity > session['land_data']['from_land']['turn_pieces']:
+            session.write({ 'action' : message['action'] , 'status' : 'reject', 'reason' : 'trying to remove a quantity bigger than the added quantity' })
+            return
+    
+        if quantity <= 0:
+            session.write({ 'action' : message['action'] , 'status' : 'reject', 'reason' : 'quantity is zero or negative' })
+            return
+        
+        session['land_data'][to_land]['turn_pieces'] -= quantity
+        
+        self.broadcast(None, { 'action' : 'wargame_status_update' , 'status' : 'player removed a piece', 'user' : session.username , 'where' : from_land, 'quantity' : message['quantity'] })            
+            
 
     def handle_wargame_attack_land(self, session, message):
         logging.debug('Handling land attack request from session {0}'.format(session))
@@ -350,7 +373,7 @@ class Wargame(broadcastable.Broadcastable):
             player['land_data'] = {}
             
             def assign_land(land): 
-                player['land_data'][land] = { 'count' : 0 }
+                player['land_data'][land] = { 'count' : 0 , 'turn_pieces' : 0 }
                 
             map(lambda land: assign_land(land), sorted_lands[i : i + minimum_lands])
             i += minimum_lands
@@ -359,7 +382,7 @@ class Wargame(broadcastable.Broadcastable):
 
         #add remaining lands to a sorted player list
         for player, land in zip(sorted_players, sorted_lands[i:]):    
-            player['land_data'][land] = { 'count' : 0 }
+            player['land_data'][land] = { 'count' : 0 , 'turn_pieces' : 0 }
             player['over_landed'] = True
 
     #removing objectives for where a player color is not present
