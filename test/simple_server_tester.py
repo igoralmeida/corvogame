@@ -34,6 +34,7 @@ class Client(ClientHandler):
                                  'lobby_info' : self.handle_lobby_info,
                                  'logon_response' : self.handle_session_logon,
                                  'lobby_create_game' : self.handle_game_create,
+                                 'wargame_lobby_join' : self.handle_join_game,
                                  'wargame_handshake' : self.handle_wargame_handshake }
 
         lobby_actions = [ ('say something' , { 'action' : 'lobby_chat', 'fields' : [ ('message', str, True) ] }),
@@ -102,6 +103,10 @@ class Client(ClientHandler):
       self.write(message)
       
       self.showing_menu = False
+      
+    def handle_join_game(self, message):
+        if message['status'] == 'successfull':
+            self.current_state = self.GAME_LOBBY
       
     def session_logon(self, message):
       print "session {0} logged.".format(message['username'])
