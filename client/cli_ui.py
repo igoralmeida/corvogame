@@ -47,13 +47,13 @@ class Cli_Ui(ui.Common_Ui, threading.Thread, cmd.Cmd):
             status = message[u'status']
 
             if status == u'init':
-                str = 'Conectando...'
+                statusmsg = 'Conectando...'
             elif status == u'established':
-                str = 'Conectado!'
+                statusmsg = 'Conectado!'
             elif status == u'off':
-                str = 'Desconectado'
+                statusmsg = 'Desconectado'
 
-            print str
+            print statusmsg
 
     def user_logon_event(self, user):
         print '{0} entrou'.format(user)
@@ -118,25 +118,25 @@ class Cli_Ui(ui.Common_Ui, threading.Thread, cmd.Cmd):
     def emptyline(self):
         pass
 
-    def handler_chatmsg(self, str):
+    def handler_chatmsg(self, msg):
         """ This is one of the addresses self.default will point to.
         This handler is responsible for treating the chat message and sending it
         to the conhandler.
         """
-        if str.__len__() > 0:
-            if str == 'EOF':
+        if msg.__len__() > 0:
+            if msg == 'EOF':
                 #TODO signal the conhandler and close everything
                 pass
             else:
-                self.chat_send(str)
+                self.chat_send(msg)
 
-    def handler_logonmsg(self, str):
+    def handler_logonmsg(self, info):
         """ This is one of the addresses self.default will point to.
         This handler is responsible for storing the (possibly correct) logon
         message until the underlying client-handler fetches it with
         self.get_logon()
         """
-        self.store_logon(str)
+        self.store_logon(info)
 
     def do_quit(self, s):
         """ Terminar a GUI e sair """
