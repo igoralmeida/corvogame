@@ -101,10 +101,6 @@ class Client(client_handler.ClientHandler):
         self.lh.inbuffer = self.inbuffer
 
     def shutdown(self):
-        # FIXME if we were called too soon, there was no time to instantiate
-        # LobbyHandler in handover_to_lobbyhandler and this will trigger an
-        # exception.
-
         logging.debug("Client is shutting down...")
         if self.lh is not None:
             self.lh.shutdown()
