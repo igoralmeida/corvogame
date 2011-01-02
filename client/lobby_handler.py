@@ -60,7 +60,8 @@ class LobbyHandler(client_handler.ClientHandler):
 
     def logon_bcast(self, message):
         user = message[u'username']
-        self.add_user(user)
+        uid = message[u'user_id']
+        self.add_user(user, uid)
         self.signal_ui(ui_messages.logon(user))
         logging.info('User {0} logs in'.format(user))
 
@@ -108,9 +109,10 @@ class LobbyHandler(client_handler.ClientHandler):
             if i[u'username'] not in self.users:
                 self.users.update({i[u'username']: i})
 
-    def add_user(self, name):
+    def add_user(self, name, uid):
+        #TODO must check if user_id is incoherent
         if name not in self.users:
-            self.users.update({name: {u'username': name}})
+            self.users.update({name: {u'username': name, u'user_id': uid}})
 
     def remove_user(self, name):
         if name in self.users:
