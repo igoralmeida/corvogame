@@ -44,6 +44,7 @@ class LobbyHandler(client_handler.ClientHandler):
 
         self.rooms = []
         self.users = {} #{'name':{username:'name',...}, 'name2':...}
+        self.gametypes = []
 
     def common_parse(self, message):
         if message[u'action'].startswith('lobby_'):
@@ -75,6 +76,7 @@ class LobbyHandler(client_handler.ClientHandler):
         if message[u'action'] == u'lobby_info':
             newrooms = [r for r in message[u'rooms'] if r not in self.rooms]
             self.rooms.append(newrooms)
+            self.gametypes.extend(message[u'available_games']) #FIXME must update properly
             self.update_users(message[u'users'])
 
             self.signal_ui(ui_messages.user_list(self.users))
@@ -94,6 +96,27 @@ class LobbyHandler(client_handler.ClientHandler):
     def chat_send(self, text):
         message = { u'action': 'lobby_chat', u'message': text }
         self.write(self.message_handler.to_string(message))
+
+    def create_game(self, game_type, room_name):
+        message = {u'action': 'lobby_create_game', u'game_type': game_type, u'room_name': room_name}
+        self.write(self.message_handler.to_string(message))
+
+    def ui_responder(self, msg):
+        """ Centralizes the queries coming from the UI. """
+
+        if msg[u'action'] == 'request':
+            if msg[u'value'] == 'rooms':
+                return self.rooms
+            elif msg[u'value'] == 'users':
+                return self.users
+            elif msg[u'value'] == 'gametypes':
+                return self.gametypes
+        elif msg[u'action'] == 'create_game':
+            #TODO must check if game_type is valid
+            self.create_game(
+                game_type=msg[u'game_type'],
+                room_name=msg[u'room_name']
+            )
 
     def signal_ui(self, message):
         if self.ui is not None:

@@ -34,3 +34,9 @@ def request_rooms():
 def request_users():
     return {u'action': 'request', u'value': 'users'}
 
+def request_gametypes():
+    return {u'action': 'request', u'value': 'gametypes'}
+
+def create_game(game_type, room_name):
+    return {u'action': 'create_game', u'game_type': game_type, u'room_name': room_name}
+

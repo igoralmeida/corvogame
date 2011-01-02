@@ -143,11 +143,7 @@ class Cli_Ui(ui.Common_Ui, threading.Thread, cmd.Cmd):
 
     def signal_conhandler(self, msg):
         if self.conhandler is not None:
-            if msg[u'action'] == 'request':
-                if msg[u'value'] == 'rooms':
-                    return self.conhandler.rooms #FIXME this should be different
-                elif msg[u'value'] == 'users':
-                    return self.conhandler.users #FIXME this should be different
+            return self.conhandler.ui_responder(msg)
 
     def do_quit(self, s):
         """ Terminar a GUI e sair """
@@ -164,4 +160,17 @@ class Cli_Ui(ui.Common_Ui, threading.Thread, cmd.Cmd):
         """ Get the list of users """
         users = self.signal_conhandler(ui_messages.request_users())
         print users
+
+    def do_gametypes(self, s):
+        """ Get the list of game types """
+        types = self.signal_conhandler(ui_messages.request_gametypes())
+        print types
+
+    def do_create_game(self, s):
+        """ Create a game room """
+        info = s.split(' ', 1)
+
+        self.signal_conhandler(ui_messages.create_game(
+            game_type=info[0], room_name=info[1])
+        )
 
