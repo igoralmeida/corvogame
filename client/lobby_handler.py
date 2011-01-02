@@ -76,9 +76,11 @@ class LobbyHandler(client_handler.ClientHandler):
             newrooms = [r for r in message[u'rooms'] if r not in self.rooms]
             self.rooms.append(newrooms)
             self.update_users(message[u'users'])
+
+            self.signal_ui(ui_messages.user_list(self.users))
+            self.signal_ui(ui_messages.room_list(self.rooms))
         elif message[u'action'] == u'lobby_session_logon':
-            #FIXME should use logon_bcast(), right?
-            self.signal_ui(ui_messages.logon(message[u'username']))
+            self.logon_bcast(message)
             self.signal_ui(ui_messages.enable_chat())
 
         self.read_handler = self.common_parse
@@ -103,6 +105,9 @@ class LobbyHandler(client_handler.ClientHandler):
                 self.ui.user_logout_event(message[u'user'])
             elif message[u'action'] == u'enable_chat':
                 self.ui.enable_chat()
+            elif (message[u'action'] == u'user_list' or
+                    message[u'action'] == u'room_list'):
+                self.ui.list_update(message[u'dicts'])
 
     def update_users(self, user_dicts):
         for i in user_dicts:

@@ -21,3 +21,16 @@ def connection(status):
         raise ValueError
 
     return {u'action': 'connection', u'status': status}
+
+def user_list(user_dicts):
+    return {u'action': 'user_list', u'dicts': user_dicts}
+
+def room_list(room_dicts):
+    return {u'action': 'room_list', u'dicts': room_dicts}
+
+def request_rooms():
+    return {u'action': 'request', u'value': 'rooms'}
+
+def request_users():
+    return {u'action': 'request', u'value': 'users'}
+

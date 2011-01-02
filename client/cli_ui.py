@@ -14,7 +14,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with corvogame.  If not, see <http://www.gnu.org/licenses/>.
 
-import ui
+import ui, ui_messages
 import logging
 import readline
 import threading
@@ -60,6 +60,9 @@ class Cli_Ui(ui.Common_Ui, threading.Thread, cmd.Cmd):
 
     def user_logout_event(self, user):
         print '{0} saiu'.format(user)
+
+    def list_update(self, dicts):
+        print '-=-=-=- atualizando -=-=-=-',dicts
 
     def enable_chat(self):
         self.state = PROMPTING_CHATMSG
@@ -138,9 +141,27 @@ class Cli_Ui(ui.Common_Ui, threading.Thread, cmd.Cmd):
         """
         self.store_logon(info)
 
+    def signal_conhandler(self, msg):
+        if self.conhandler is not None:
+            if msg[u'action'] == 'request':
+                if msg[u'value'] == 'rooms':
+                    return self.conhandler.rooms #FIXME this should be different
+                elif msg[u'value'] == 'users':
+                    return self.conhandler.users #FIXME this should be different
+
     def do_quit(self, s):
         """ Terminar a GUI e sair """
         self.state = NOPROMPT
         self.stop()
         return True
+
+    def do_rooms(self, s):
+        """ Get the list of rooms """
+        rooms = self.signal_conhandler(ui_messages.request_rooms())
+        print rooms
+
+    def do_users(self, s):
+        """ Get the list of users """
+        users = self.signal_conhandler(ui_messages.request_users())
+        print users
 

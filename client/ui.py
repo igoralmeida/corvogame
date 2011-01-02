@@ -61,3 +61,7 @@ class Common_Ui():
         """ Connection status information. See ui_messages.py """
         raise NotImplementedError
 
+    def list_update(self, dicts):
+        """ Receiving an updated version of rooms or user list """
+        raise NotImplementedError
+
