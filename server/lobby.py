@@ -61,7 +61,7 @@ class Lobby(broadcastable.Broadcastable):
       
       del self.sessions[session.username]
       
-      session.write({ 'action' : 'lobby_create_game', 'status' : 'sucessfull', 'game_id' : game_id  })
+      session.write({ 'action' : 'lobby_create_game', 'status' : 'successful', 'game_id' : game_id  })
       self.broadcast({ u'session' : 'lobby' }, { 'action' : 'lobby_game_created', 
                                                  'room_name' : message['room_name'], 
                                                  'username': session.username, 
