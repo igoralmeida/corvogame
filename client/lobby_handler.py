@@ -56,6 +56,7 @@ class LobbyHandler(client_handler.ClientHandler):
                 'chat': self.chat_received,
                 'game_created': self.game_created,
                 'info': self.info_parser,
+                'create_game': self.game_creation_response,
             }[action](message)
         elif message[u'action'] == u'ping':
             #TODO would respond with pong, but handler is missing in server
@@ -73,6 +74,43 @@ class LobbyHandler(client_handler.ClientHandler):
         self.remove_user(user)
         self.signal_ui(ui_messages.logout(user))
         logging.info('User logs out'.format(user))
+
+    def game_creation_response(self, message):
+        """ Our game request has been answered
+
+        FIXME
+        With the current design, we have 2 choices:
+            * Handover to yet another class, say, WargameHandler, at the time of
+            game request and risk being handover'ed back to LobbyHandler if our
+            game lobby was rejected
+
+            * Use this method to parse the game creation response, handover to
+            WargameHandler in case we were accepted, but risk having to parse
+            early action:wargame_lobby_* messages here in LobbyHandler if they
+            come before the handover is done
+
+        Since there is no way to re-insert messages in the queue, i'm going with
+        the second. BUT THIS NEEDS TO BE FUCKING FIXED: create a know-it-all
+        Client class which delivers to many xxxxHandler classes based on
+        msg[u'action'].startswith
+        """
+
+        status = message[u'status']
+
+        if status == 'successful':
+            logging.info('Game creation has been accepted')
+            info = message[u'game_id']
+            logging.debug('Would perform handover to xxxxgameHandler')
+            #TODO implement this
+            #self.handover_to_gamehandler()
+
+        elif message[u'status'] == 'rejected':
+            info = message[u'reason']
+            logging.info('Game creation has been rejected: {0}'.format(
+                info))
+            self.signal_ui(ui_messages.enable_chat())
+
+        self.signal_ui(ui_messages.game_creation_response(status,info))
 
     def game_created(self, message):
         """ Someone has created a game """
@@ -143,6 +181,8 @@ class LobbyHandler(client_handler.ClientHandler):
                 game = message.copy()
                 del game[u'action']
                 self.ui.game_created(game)
+            elif message[u'action'] == 'game_creation_response':
+                self.ui.game_creation_response(message)
 
     def update_users(self, user_dicts):
         for i in user_dicts:

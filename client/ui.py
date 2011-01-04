@@ -69,3 +69,7 @@ class Common_Ui():
         """ Someone has created a game lobby """
         raise NotImplementedError
 
+    def game_creation_response(self, msg):
+        """ The server responded to our game creation request """
+        raise NotImplementedError
+

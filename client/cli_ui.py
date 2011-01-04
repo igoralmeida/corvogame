@@ -64,6 +64,12 @@ class Cli_Ui(ui.Common_Ui, threading.Thread, cmd.Cmd):
     def list_update(self, dicts):
         print '-=-=-=- atualizando -=-=-=-',dicts
 
+    def game_creation_response(self, msg):
+        if msg[u'status'] == 'accepted':
+            print 'Jogo criado com sucesso'
+        elif msg[u'status'] == 'rejected':
+            print 'Criacao de jogo rejeitada: {0}'.format(msg[u'info'])
+
     def enable_chat(self):
         self.state = PROMPTING_CHATMSG
         self.default = self.handler_chatmsg
@@ -177,4 +183,6 @@ class Cli_Ui(ui.Common_Ui, threading.Thread, cmd.Cmd):
         self.signal_conhandler(ui_messages.create_game(
             game_type=info[0], room_name=info[1])
         )
+
+        self.state = NOPROMPT
 
