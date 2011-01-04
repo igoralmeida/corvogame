@@ -36,7 +36,7 @@ class LobbyHandler(client_handler.ClientHandler):
         self.Cfg = cfg
 
         self.message_handler = msg_handler
-        self.read_handler = self.lobby_parse
+        self.read_handler = self.common_parse
 
         self.ui = ui
         if ui is not None:
@@ -54,6 +54,8 @@ class LobbyHandler(client_handler.ClientHandler):
                 'session_logon': self.logon_bcast,
                 'session_logout': self.logout_bcast,
                 'chat': self.chat_received,
+                'game_created': self.game_created,
+                'info': self.info_parser,
             }[action](message)
         elif message[u'action'] == u'ping':
             #TODO would respond with pong, but handler is missing in server
@@ -72,20 +74,26 @@ class LobbyHandler(client_handler.ClientHandler):
         self.signal_ui(ui_messages.logout(user))
         logging.info('User logs out'.format(user))
 
-    def lobby_parse(self, message):
-        if message[u'action'] == u'lobby_info':
-            newrooms = [r for r in message[u'rooms'] if r not in self.rooms]
-            self.rooms.append(newrooms)
-            self.gametypes.extend(message[u'available_games']) #FIXME must update properly
-            self.update_users(message[u'users'])
+    def game_created(self, message):
+        """ Someone has created a game """
+        game = message.copy()
+        del game[u'action']
 
-            self.signal_ui(ui_messages.user_list(self.users))
-            self.signal_ui(ui_messages.room_list(self.rooms))
-        elif message[u'action'] == u'lobby_session_logon':
-            self.logon_bcast(message)
-            self.signal_ui(ui_messages.enable_chat())
+        #FIXME should look for inconsistencies
+        self.rooms.append(game)
 
-        self.read_handler = self.common_parse
+        self.signal_ui(ui_messages.game_created(user=game[u'username'],
+            game_type=game[u'game_type'], room_name=game[u'room_name']))
+
+    def info_parser(self, message):
+        newrooms = [r for r in message[u'rooms'] if r not in self.rooms]
+        self.rooms.extend(newrooms)
+        self.gametypes.extend(message[u'available_games']) #FIXME must update properly
+        self.update_users(message[u'users'])
+
+        self.signal_ui(ui_messages.user_list(self.users))
+        self.signal_ui(ui_messages.room_list(self.rooms))
+        self.signal_ui(ui_messages.enable_chat())
 
     def chat_received(self, message):
         sender = message[u'sender']
@@ -131,6 +139,10 @@ class LobbyHandler(client_handler.ClientHandler):
             elif (message[u'action'] == u'user_list' or
                     message[u'action'] == u'room_list'):
                 self.ui.list_update(message[u'dicts'])
+            elif message[u'action'] == 'game_created':
+                game = message.copy()
+                del game[u'action']
+                self.ui.game_created(game)
 
     def update_users(self, user_dicts):
         for i in user_dicts:

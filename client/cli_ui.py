@@ -93,6 +93,10 @@ class Cli_Ui(ui.Common_Ui, threading.Thread, cmd.Cmd):
         self.logon_info = None
         return l, p
 
+    def game_created(self, game_dict):
+        print '{0} criou jogo {1}:'.format(game_dict[u'username'],
+            game_dict[u'game_type']), game_dict
+
     def chat_received(self, message):
         print '<{0}> {1}\n'.format(message[u'sender'], message[u'message'])
 

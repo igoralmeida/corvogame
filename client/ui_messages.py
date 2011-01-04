@@ -40,3 +40,6 @@ def request_gametypes():
 def create_game(game_type, room_name):
     return {u'action': 'create_game', u'game_type': game_type, u'room_name': room_name}
 
+def game_created(user, game_type, room_name):
+    return {'action': 'game_created', 'username': user,
+        'game_type': game_type, 'room_name': room_name}

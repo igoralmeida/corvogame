@@ -65,3 +65,7 @@ class Common_Ui():
         """ Receiving an updated version of rooms or user list """
         raise NotImplementedError
 
+    def game_created(self, game_dict):
+        """ Someone has created a game lobby """
+        raise NotImplementedError
+
