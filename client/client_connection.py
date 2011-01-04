@@ -98,7 +98,12 @@ class Client(client_handler.ClientHandler):
     def handover_to_lobbyhandler(self):
         self.lh = lobby_handler.LobbyHandler(sock=self.socket, cfg=self.config,
             msg_handler=self.message_handler, ui=self.ui)
-        self.lh.inbuffer = self.inbuffer
+        self.lh.inbuffer = self.lh.inbuffer.join(self.inbuffer)
+
+        #FIXME this is a hack, what we really need is a way to pass the
+        # 'messages' var in ClientHandler.handle_read to the ClientHandler in
+        # self.lh
+        self.read_handler = self.lh.read_handler
 
     def shutdown(self):
         logging.debug("Client is shutting down...")
