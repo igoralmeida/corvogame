@@ -38,11 +38,11 @@ class Lobby(broadcastable.Broadcastable):
 
     def handle_create_game(self, session, message):
       if not message['game_type'] in self.game_builders:
-        session.write({ 'action' : message['action'], 'status' : 'reject', 'reason' : 'invalid game type : ' + message['game_type'] })
+        session.write({ 'action' : message['action'], 'status' : 'rejected', 'reason' : 'invalid game type : ' + message['game_type'] })
         return
       
       if not len(message['room_name']) > 3:
-        session.write({ 'action' : message['action'], 'status' : 'reject', 'reason' : 'room name too small' })
+        session.write({ 'action' : message['action'], 'status' : 'rejected', 'reason' : 'room name too small' })
         return
         
       game_id = uuid.uuid1().get_hex()
