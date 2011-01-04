@@ -1,6 +1,5 @@
 ####################  PENDENCIAS IMEDIATAS ######################
-Interacao com lobby
-Chat
+Interface grafica nao atualiza a maldita lista de usuarios
 
 ####################  PROBLEMAS CONHECIDOS  ######################
 Conectar sem servidor rodando: erro em handle_error

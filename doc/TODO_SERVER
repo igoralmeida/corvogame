@@ -21,3 +21,7 @@ http://docs.python.org/library/asyncore.html
 Twisted matrix (lib mais fuderosa de network que conheço, não sei se temos necessidade de tanto poder assim, mas pode quebrar um galho nas abstrações pra gente)
 http://twistedmatrix.com/trac/
 http://onlamp.com/pub/a/python/2006/08/10/untwisting-python-network-programming.html
+
+####################  BUGS ######################
+
+O servidor nao deleta o jogo criado caso o dono desconecte
