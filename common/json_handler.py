@@ -42,8 +42,8 @@ class Handler(object):
                 msg = json.loads(message)
                 logging.debug("Parsed {0}".format(msg))
                 output.append(msg)
-                index = r_index + len(self.separator)
-                r_index = raw_message.find('\n', index)
+                index = r_index
+                r_index = raw_message.find('\n', index + len(self.separator))
                 logging.debug("index is {0}, r_index is {1}".format(index, r_index))
             except Exception, e:
                 logging.debug("Error processing input: {0}".format(e))
