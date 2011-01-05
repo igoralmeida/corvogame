@@ -31,6 +31,8 @@ class WargameLobby(broadcastable.Broadcastable):
     self.room_owner = room_owner
     self.room_name = room_configuration['room_name']
     self.game_id = game_id
+
+    #FIXME isso deveria ser herdado: todos os jogos terao
     self.message_handlers = { 'wargame_lobby_chat' : self.handle_send_lobby_chat,
                               'wargame_lobby_set_self_color' : self.handle_set_self_color, 
                               'wargame_lobby_set_self_ready' : self.handle_set_self_ready,
