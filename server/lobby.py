@@ -50,7 +50,7 @@ class Lobby(broadcastable.Broadcastable):
       logging.info("Session {0} is trying to create a game of type {1} and room name of {2}".format(session.username , message['game_type'], message['room_name']))
       game_lobby = self.game_builders[message['game_type']].build_lobby(main_lobby=self, room_owner=session, room_configuration= message, game_id=game_id)
       
-      self.games[message['room_name']]  =  { 'room_id' : game_id, 'game_lobby' : game_lobby }
+      self.games[game_id]  =  { 'game_name' : message['room_name'], 'game_lobby' : game_lobby }
       
       logging.info("Created sucessfully")
       
@@ -91,7 +91,7 @@ class Lobby(broadcastable.Broadcastable):
         session.shutdown()
 
     def add_game(self, name, game_factory):
-        if name not in self.games:
+        if name not in [room['game_name'] for room in self.games]:
             self.game_builders[name] = game_factory
 
     def handle_chat(self, session, message):
@@ -101,7 +101,7 @@ class Lobby(broadcastable.Broadcastable):
 
     def get_rooms(self):
         logging.debug("Getting rooms")
-        return [ { 'game_name' : game_name, 'game_id' : self.games[game_name]['room_id'] } for game_name in self.games ]
+        return [ { 'game_name' : self.games[room_id]['game_name'], 'game_id' : room_id } for room_id in self.games ]
 
     def get_users(self):
         logging.debug("Getting users")
