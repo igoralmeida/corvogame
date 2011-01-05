@@ -189,3 +189,14 @@ class Cli_Ui(ui.Common_Ui, threading.Thread, cmd.Cmd):
 
             self.state = NOPROMPT
 
+    def do_join_game(self, s):
+        """ Join a game room, given the id """
+
+        info = s.split(' ', 1)
+
+        if (info.__len__() != 1 or info[0].__len__() != 32):
+            print 'Uso:\n','join_game <room_id>'
+        else:
+            self.signal_conhandler(ui_messages.join_game(info[0]))
+            self.state = NOPROMPT
+

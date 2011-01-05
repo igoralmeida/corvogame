@@ -47,3 +47,7 @@ def game_created(user, game_type, room_name):
 def game_creation_response(status, info):
     return {u'action': 'game_creation_response', u'status': status,
         u'info': info}
+
+def join_game(room_id):
+    return {u'action': 'join_game', u'room_id': room_id}
+

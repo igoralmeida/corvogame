@@ -147,6 +147,13 @@ class LobbyHandler(client_handler.ClientHandler):
         message = {u'action': 'lobby_create_game', u'game_type': game_type, u'room_name': room_name}
         self.write(self.message_handler.to_string(message))
 
+    def join_game(self, room_id):
+        if room_id.__len__() != 32:
+            logging.error('Bad room id hash: {0}'.format(room_id))
+        else:
+            message = {u'action': 'lobby_join_game', u'room_id': room_id}
+            self.write(self.message_handler.to_string(message))
+
     def ui_responder(self, msg):
         """ Centralizes the queries coming from the UI. """
 
@@ -163,6 +170,8 @@ class LobbyHandler(client_handler.ClientHandler):
                 game_type=msg[u'game_type'],
                 room_name=msg[u'room_name']
             )
+        elif msg[u'action'] == 'join_game':
+            self.join_game(msg[u'room_id'])
 
     def signal_ui(self, message):
         if self.ui is not None:
