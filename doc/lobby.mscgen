@@ -15,12 +15,15 @@ msc {
     Lobby->Session [ label = " REJECTED -> { 'action' : 'lobby_create_game', 'status' : 'rejected' , 'reason' : REASON }" ] ;
     
     Lobby->Session [ label = " ACCEPTED -> { 'action' : 'lobby_create_game', 'status' : 'successful' , 'game_id' : GAME_ID }" ] ;
-    Lobby->Session [ label = " For each session -> { 'action' : 'lobby_game_created', 'room_name' : ROOM_NAME , 'username' : USERNAME, 'game_type' : GAME_TYPE }" ] ;
+    Lobby->Session [ label = " For each session -> { 'action' : 'lobby_game_created', 'room_name' : ROOM_NAME ,\n'username' : USERNAME, 'game_type' : GAME_TYPE }" ] ;
 
     --- [ label = "Game information" ];
     Lobby->Session [ label = "{'action': 'wargame_lobby_game_capabilities', 'available_colors': [...], 'capabilities': [...]}" ];
 
     --- [ label = "Game lobby" ];
-    Lobby->Session [ label = "{'action': 'wargame_lobby_join', 'status': 'successful', 'message': 'user has joined lobby', 'user': 'user'}" ];
+    Session->Lobby [ label = "{'action': 'lobby_join_game', 'room_id': ROOM_ID}" ];
+    Session<-Lobby [ label = "ACCEPTED -> {'action': 'wargame_lobby_join', 'status': 'successful', 'message': 'user has joined lobby', 'user': USER}" ];
+    Session<-Lobby [ label = "LOBBY FULL -> {'action': 'wargame_lobby_join', 'status': 'error', 'reason': 'Max players reached :('}" ];
+    --- [ label = "After this, sends messages in 'Game Information'" ];
 }
 

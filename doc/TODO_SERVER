@@ -25,3 +25,5 @@ http://onlamp.com/pub/a/python/2006/08/10/untwisting-python-network-programming.
 ####################  BUGS ######################
 
 O servidor nao deleta o jogo criado caso o dono desconecte
+O servidor nao informa aos usuarios o room_id, para que entrem na sala (mensagem action:lobby_game_created)
+O servidor nao repassa as mensagens para todos os presentes no gamelobby
