@@ -180,9 +180,12 @@ class Cli_Ui(ui.Common_Ui, threading.Thread, cmd.Cmd):
         """ Create a game room """
         info = s.split(' ', 1)
 
-        self.signal_conhandler(ui_messages.create_game(
-            game_type=info[0], room_name=info[1])
-        )
+        if info.__len__() < 2:
+            print 'Uso:\n','create_game <tipo> <nome da sala>'
+        else:
+            self.signal_conhandler(ui_messages.create_game(
+                game_type=info[0], room_name=info[1])
+            )
 
-        self.state = NOPROMPT
+            self.state = NOPROMPT
 
