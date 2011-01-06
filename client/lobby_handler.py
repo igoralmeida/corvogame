@@ -14,29 +14,24 @@
 #    You should have received a copy of the GNU General Public License
 #    along with corvogame.  If not, see <http://www.gnu.org/licenses/>.
 
-from common import client_handler
-from debug import debug
-import config
 import ui_messages
 
-import asyncore
 import logging
 
-class LobbyHandler(client_handler.ClientHandler):
+class LobbyHandler():
     ''' Lobby-level message parser.
 
-    Uses connection from client_connection.Client and syncs user/room
-    information with lobby on server
+    Syncs user/room information with lobby on server
     '''
 
-    def __init__(self, sock, cfg, msg_handler, ui=None):
-        client_handler.ClientHandler.__init__(self, sock)
+    def __init__(self, cfg, msg_handler, msg_sender, ui=None):
         logging.debug("Initializing LobbyHandler...")
 
         self.Cfg = cfg
 
         self.message_handler = msg_handler
         self.read_handler = self.common_parse
+        self.msg_sender = msg_sender
 
         self.ui = ui
         if ui is not None:
@@ -141,18 +136,18 @@ class LobbyHandler(client_handler.ClientHandler):
 
     def chat_send(self, text):
         message = { u'action': 'lobby_chat', u'message': text }
-        self.write(self.message_handler.to_string(message))
+        self.msg_sender(self.message_handler.to_string(message))
 
     def create_game(self, game_type, room_name):
         message = {u'action': 'lobby_create_game', u'game_type': game_type, u'room_name': room_name}
-        self.write(self.message_handler.to_string(message))
+        self.msg_sender(self.message_handler.to_string(message))
 
     def join_game(self, room_id):
         if room_id.__len__() != 32:
             logging.error('Bad room id hash: {0}'.format(room_id))
         else:
             message = {u'action': 'lobby_join_game', u'room_id': room_id}
-            self.write(self.message_handler.to_string(message))
+            self.msg_sender(self.message_handler.to_string(message))
 
     def ui_responder(self, msg):
         """ Centralizes the queries coming from the UI. """

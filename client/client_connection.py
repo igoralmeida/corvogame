@@ -43,7 +43,8 @@ class Client(client_handler.ClientHandler):
 
         self.message_handlers = {}
 
-        self.lh = None #LobbyHandler reference for future handover
+        self.lh = None #LobbyHandler reference
+        self.gamehandler = None #xxxGameHandler reference
 
     def signal_ui(self, message):
         ''' Signal the UI something important has happened.
@@ -87,7 +88,7 @@ class Client(client_handler.ClientHandler):
         if message[u'action'] == u'logon_response':
             if message[u'authenticated'] == u'yes':
                 logging.info("Successful authentication as {0}".format(self.config.username))
-                self.handover_to_lobbyhandler()
+                self.init_lobbyhandler()
             else:
                 logging.error("Authentication failure for username '{0}' : {1}".format(self.config.username, message[u'result_text']))
 
@@ -95,21 +96,31 @@ class Client(client_handler.ClientHandler):
                 l, p = self.ui.get_logon()
                 self.send_logon(l, p)
 
-    def handover_to_lobbyhandler(self):
-        self.lh = lobby_handler.LobbyHandler(sock=self.socket, cfg=self.config,
-            msg_handler=self.message_handler, ui=self.ui)
-        self.lh.inbuffer = self.lh.inbuffer.join(self.inbuffer)
+    def init_lobbyhandler(self):
+        self.lh = lobby_handler.LobbyHandler(
+            cfg=self.config,
+            msg_handler=self.message_handler,
+            msg_sender=self.write,
+            ui=self.ui
+        )
 
-        #FIXME this is a hack, what we really need is a way to pass the
-        # 'messages' var in ClientHandler.handle_read to the ClientHandler in
-        # self.lh
-        self.read_handler = self.lh.read_handler
+        self.read_handler = self.lobby_distributor
+
+    def lobby_distributor(self, msg):
+        """ Delivers messages to the correct xxxHandler """
+        if msg[u'action'].startswith('lobby_'):
+            self.lh.read_handler(msg)
+        elif msg[u'action'].startswith('wargame_'): #FIXME should be game-agnostic
+            if self.gamehandler is not None:
+                self.gamehandler.read_handler(msg)
 
     def shutdown(self):
         logging.debug("Client is shutting down...")
-        if self.lh is not None:
-            self.lh.shutdown()
+
+        self.lh = None
         self.signal_ui(ui_messages.connection('off'))
+        client_handler.ClientHandler.shutdown(self)
+
         logging.debug("done")
 
     def handle_connect(self):
