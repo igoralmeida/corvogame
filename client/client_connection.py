@@ -119,7 +119,11 @@ class Client(client_handler.ClientHandler):
 
         if msg.__class__ == dict:
             if 'action' in msg and msg[u'action'] == 'lobby_create_game':
-                self.gamehandler = games.GAMETYPE_TO_GAMEHANDLER[msg[u'game_type']]()
+                #TODO do the same with 'lobby_join_game', but this requires
+                #gametype info in self.rooms
+                self.gamehandler = games.GAMETYPE_TO_GAMEHANDLER[
+                    msg[u'game_type']
+                ](msg_sender=self.message_sender, ui=self.ui)
 
             self.write(self.message_handler.to_string(msg))
         else:

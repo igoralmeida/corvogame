@@ -22,8 +22,8 @@ class WargameHandler(abstract_game.GameHandler):
     available_colors = []
     available_capabilities = []
 
-    def __init__(self):
-        abstract_game.GameHandler.__init__(self)
+    def __init__(self, msg_sender, ui):
+        abstract_game.GameHandler.__init__(self, msg_sender, ui)
         self.read_handler = self.lobby_handler
 
     def lobby_handler(self, msg):
@@ -37,6 +37,8 @@ class WargameHandler(abstract_game.GameHandler):
 
             caps = msg[u'capabilities']
             self.update_capabilities(caps)
+
+            self.ui.register_connection_handler(self)
         elif action == 'join':
             pass
 
@@ -46,3 +48,12 @@ class WargameHandler(abstract_game.GameHandler):
     def update_capabilities(self, caps):
         self.available_capabilities = caps
 
+    def chat_send(self, text):
+        """ Sends chat message to server """
+
+        message = { u'action': 'wargame_lobby_chat', u'message': text }
+        self.msg_sender(message)
+
+    def ui_responder(self, msg):
+        """ Centralizes the queries coming from the UI. """
+        raise NotImplementedError

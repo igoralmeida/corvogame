@@ -15,9 +15,21 @@
 #    along with corvogame.  If not, see <http://www.gnu.org/licenses/>.
 
 class GameHandler():
-    def __init__(self):
-        pass
+    msg_sender = None
+    ui = None
+
+    def __init__(self, msg_sender, ui):
+        self.msg_sender = msg_sender
+        self.ui = ui
 
     def lobby_handler(self, msg):
         """ Handles game setup and lobby """
+        raise NotImplementedError
+
+    def chat_send(self, text):
+        """ Sends chat message to server """
+        raise NotImplementedError
+
+    def ui_responder(self, msg):
+        """ Centralizes the queries coming from the UI. """
         raise NotImplementedError
