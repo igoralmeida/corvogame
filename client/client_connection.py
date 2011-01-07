@@ -118,11 +118,17 @@ class Client(client_handler.ClientHandler):
         """ Oversees message sendings for important events """
 
         if msg.__class__ == dict:
-            if 'action' in msg and msg[u'action'] == 'lobby_create_game':
-                #TODO do the same with 'lobby_join_game', but this requires
-                #gametype info in self.rooms
+            if msg[u'action'] in ('lobby_create_game', 'lobby_join_game'):
+                if msg[u'action'] == 'lobby_create_game':
+                    gametype = msg[u'game_type']
+                else:
+                    rooms = self.lh.rooms
+                    for r in rooms:
+                        if r['game_id'] == msg[u'room_id']:
+                            gametype = r['game_type']
+
                 self.gamehandler = games.GAMETYPE_TO_GAMEHANDLER[
-                    msg[u'game_type']
+                    gametype
                 ](msg_sender=self.message_sender, ui=self.ui)
 
             self.write(self.message_handler.to_string(msg))
