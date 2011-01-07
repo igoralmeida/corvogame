@@ -136,18 +136,18 @@ class LobbyHandler():
 
     def chat_send(self, text):
         message = { u'action': 'lobby_chat', u'message': text }
-        self.msg_sender(self.message_handler.to_string(message))
+        self.msg_sender(message)
 
     def create_game(self, game_type, room_name):
         message = {u'action': 'lobby_create_game', u'game_type': game_type, u'room_name': room_name}
-        self.msg_sender(self.message_handler.to_string(message))
+        self.msg_sender(message)
 
     def join_game(self, room_id):
         if room_id.__len__() != 32:
             logging.error('Bad room id hash: {0}'.format(room_id))
         else:
             message = {u'action': 'lobby_join_game', u'room_id': room_id}
-            self.msg_sender(self.message_handler.to_string(message))
+            self.msg_sender(message)
 
     def ui_responder(self, msg):
         """ Centralizes the queries coming from the UI. """

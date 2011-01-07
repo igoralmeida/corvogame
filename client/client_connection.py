@@ -18,6 +18,7 @@ from common import client_handler
 from debug import debug
 import lobby_handler
 import ui_messages
+import games
 
 import asyncore
 import socket
@@ -78,7 +79,7 @@ class Client(client_handler.ClientHandler):
     def send_logon(self, user, passwd):
         """ Send logon information to server using credentials passed """
         logon_dict = { u'action' : 'login', u'username' : user, u'password' : passwd }
-        self.write(self.message_handler.to_string(logon_dict))
+        self.message_sender(logon_dict)
 
     #TODO remove from this class
     def logon_response_handler(self, message):
@@ -99,8 +100,7 @@ class Client(client_handler.ClientHandler):
     def init_lobbyhandler(self):
         self.lh = lobby_handler.LobbyHandler(
             cfg=self.config,
-            msg_handler=self.message_handler,
-            msg_sender=self.write,
+            msg_sender=self.message_sender,
             ui=self.ui
         )
 
@@ -113,6 +113,17 @@ class Client(client_handler.ClientHandler):
         elif msg[u'action'].startswith('wargame_'): #FIXME should be game-agnostic
             if self.gamehandler is not None:
                 self.gamehandler.read_handler(msg)
+
+    def message_sender(self, msg):
+        """ Oversees message sendings for important events """
+
+        if msg.__class__ == dict:
+            if 'action' in msg and msg[u'action'] == 'lobby_create_game':
+                self.gamehandler = games.GAMETYPE_TO_GAMEHANDLER[msg[u'game_type']]()
+
+            self.write(self.message_handler.to_string(msg))
+        else:
+            self.write(msg)
 
     def shutdown(self):
         logging.debug("Client is shutting down...")
@@ -129,4 +140,4 @@ class Client(client_handler.ClientHandler):
         self.signal_ui(ui_messages.connection('established'))
 
         self.read_handler = self.connection_response_handler
-        self.write(self.config.protocol)
+        self.message_sender(self.config.protocol)
