@@ -24,12 +24,11 @@ class LobbyHandler():
     Syncs user/room information with lobby on server
     '''
 
-    def __init__(self, cfg, msg_handler, msg_sender, ui=None):
+    def __init__(self, cfg, msg_sender, ui=None):
         logging.debug("Initializing LobbyHandler...")
 
         self.Cfg = cfg
 
-        self.message_handler = msg_handler
         self.read_handler = self.common_parse
         self.msg_sender = msg_sender
 
@@ -160,11 +159,14 @@ class LobbyHandler():
             elif msg[u'value'] == 'gametypes':
                 return self.gametypes
         elif msg[u'action'] == 'create_game':
-            #TODO must check if game_type is valid
-            self.create_game(
-                game_type=msg[u'game_type'],
-                room_name=msg[u'room_name']
-            )
+            if msg[u'game_type'] in [g[u'name'] for g in self.gametypes]:
+                self.create_game(
+                    game_type=msg[u'game_type'],
+                    room_name=msg[u'room_name']
+                )
+            else:
+                #TODO notify the UI
+                pass
         elif msg[u'action'] == 'join_game':
             self.join_game(msg[u'room_id'])
 
